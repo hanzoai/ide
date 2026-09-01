@@ -1,0 +1,687 @@
+/* ── Hanzo VS Code Workbench Overrides ─────────────────────────────────────────
+ * Overrides VS Code's --vscode-* variables and component styles to match
+ * Hanzo's premium design language. Imported after the workbench boots.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Global Overrides ──────────────────────────────────────────────────────── */
+
+body {
+  font-family: var(--hanzo-font-ui) !important;
+  background: var(--hanzo-bg) !important;
+  color: var(--hanzo-text) !important;
+}
+
+/* Flat ground. Depth comes from the surface ramp, not a vignette. */
+.monaco-workbench {
+  background: var(--hanzo-bg) !important;
+}
+
+/* ── VS Code Variable Overrides ────────────────────────────────────────────── */
+
+.monaco-workbench {
+  --vscode-editor-background: var(--hanzo-bg);
+  --vscode-sideBar-background: var(--hanzo-surface);
+  --vscode-sideBarSectionHeader-background: var(--hanzo-surface);
+  --vscode-panel-background: var(--hanzo-surface);
+  --vscode-panel-border: var(--hanzo-border);
+  --vscode-activityBar-background: var(--hanzo-surface);
+  --vscode-activityBar-foreground: var(--hanzo-text);
+  --vscode-activityBar-activeBorder: var(--hanzo-accent);
+  --vscode-activityBar-inactiveForeground: var(--hanzo-text-muted);
+  --vscode-activityBar-border: var(--hanzo-border-subtle);
+  --vscode-activityBarBadge-background: var(--hanzo-accent);
+  --vscode-activityBarBadge-foreground: #000;
+  --vscode-sideBar-border: var(--hanzo-border-subtle);
+  --vscode-sideBarSectionHeader-border: var(--hanzo-border-subtle);
+  --vscode-auxiliaryBar-border: var(--hanzo-border-subtle);
+  --vscode-editorGroup-border: var(--hanzo-border-subtle);
+  --vscode-panel-border: var(--hanzo-border-subtle);
+  --vscode-statusBar-background: var(--hanzo-surface);
+  --vscode-statusBar-foreground: var(--hanzo-text-secondary);
+  --vscode-statusBar-border: var(--hanzo-border);
+  --vscode-tab-activeBackground: var(--hanzo-bg);
+  --vscode-tab-inactiveBackground: var(--hanzo-surface);
+  --vscode-tab-activeForeground: var(--hanzo-text);
+  --vscode-tab-inactiveForeground: var(--hanzo-text-muted);
+  --vscode-tab-activeBorderTop: var(--hanzo-accent);
+  --vscode-tab-border: var(--hanzo-border-subtle);
+  --vscode-editorGroupHeader-tabsBackground: var(--hanzo-surface);
+  --vscode-titleBar-activeBackground: var(--hanzo-surface);
+  --vscode-titleBar-activeForeground: var(--hanzo-text);
+  --vscode-input-background: var(--hanzo-surface-raised);
+  --vscode-input-foreground: var(--hanzo-text);
+  --vscode-input-border: var(--hanzo-border);
+  --vscode-dropdown-background: var(--hanzo-surface-raised);
+  --vscode-dropdown-foreground: var(--hanzo-text);
+  --vscode-dropdown-border: var(--hanzo-border);
+  --vscode-button-background: var(--hanzo-accent);
+  --vscode-button-foreground: #000;
+  --vscode-button-hoverBackground: var(--hanzo-accent-bright);
+  --vscode-focusBorder: var(--hanzo-border-focus);
+  --vscode-list-activeSelectionBackground: var(--hanzo-accent-subtle);
+  --vscode-list-activeSelectionForeground: var(--hanzo-text);
+  --vscode-list-hoverBackground: var(--hanzo-surface-hover);
+  --vscode-list-focusBackground: var(--hanzo-accent-subtle);
+  --vscode-list-highlightForeground: var(--hanzo-accent);
+  --vscode-terminal-background: #111114;
+  --vscode-terminal-foreground: var(--hanzo-text);
+  --vscode-textCodeBlock-background: #111114;
+  --vscode-widget-border: var(--hanzo-border);
+  --vscode-widget-shadow: var(--hanzo-shadow-lg);
+  --vscode-editorWidget-background: var(--hanzo-surface-raised);
+  --vscode-editorWidget-foreground: var(--hanzo-text);
+  --vscode-editorWidget-border: var(--hanzo-border);
+  --vscode-quickInput-background: var(--hanzo-surface-raised);
+  --vscode-quickInput-foreground: var(--hanzo-text);
+  --vscode-quickInputList-focusBackground: var(--hanzo-accent-subtle);
+  --vscode-quickInputTitle-background: var(--hanzo-surface);
+  --vscode-notifications-background: var(--hanzo-surface-raised);
+  --vscode-notifications-foreground: var(--hanzo-text);
+  --vscode-notifications-border: var(--hanzo-border);
+  --vscode-notificationCenterHeader-background: var(--hanzo-surface);
+  --vscode-badge-background: var(--hanzo-accent);
+  --vscode-badge-foreground: #000;
+  --vscode-scrollbarSlider-background: rgba(255, 255, 255, 0.06);
+  --vscode-scrollbarSlider-hoverBackground: var(--hanzo-accent-glow);
+  --vscode-scrollbarSlider-activeBackground: var(--hanzo-accent-dim);
+  --vscode-editorLineNumber-foreground: var(--hanzo-text-muted);
+  --vscode-editorLineNumber-activeForeground: var(--hanzo-text-secondary);
+  --vscode-editor-selectionBackground: rgba(255, 255, 255, 0.15);
+  --vscode-editor-selectionHighlightBackground: rgba(255, 255, 255, 0.08);
+  --vscode-editorCursor-foreground: var(--hanzo-accent);
+  --vscode-minimap-selectionHighlight: var(--hanzo-accent-glow);
+  --vscode-descriptionForeground: var(--hanzo-text-secondary);
+  --vscode-breadcrumb-foreground: var(--hanzo-text-muted);
+  --vscode-breadcrumb-focusForeground: var(--hanzo-accent);
+  --vscode-breadcrumb-activeSelectionForeground: var(--hanzo-text);
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  transition: background var(--hanzo-transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hanzo-accent-glow);
+}
+
+/* ── Focus Rings ───────────────────────────────────────────────────────────── */
+
+/* Only things the user actually tabs to. A universal `*:focus-visible` also
+ * catches layout containers — the editor group takes focus on load, and a ring
+ * on that draws a full-height line down the edge of the editor. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role='button']:focus-visible,
+[role='tab']:focus-visible,
+[role='option']:focus-visible,
+[role='checkbox']:focus-visible,
+.monaco-workbench .action-item:focus-visible,
+.monaco-workbench .monaco-list-row:focus-visible {
+  outline: 1px solid var(--hanzo-accent-dim) !important;
+  outline-offset: -1px;
+  box-shadow: none !important;
+}
+
+/* ── Selection ─────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--hanzo-text);
+}
+
+/* ── Activity Bar (D2) ─────────────────────────────────────────────────────── */
+
+.monaco-workbench .activitybar {
+  background: var(--hanzo-surface) !important;
+  border-right: none !important;
+  box-shadow: none !important;
+}
+
+/* Active icon — full strength against dimmed neighbours. */
+.monaco-workbench .activitybar .action-item .action-label {
+  color: var(--hanzo-text-muted) !important;
+}
+
+.monaco-workbench .activitybar .action-item.checked .action-label {
+  color: var(--hanzo-text) !important;
+  filter: none;
+}
+
+/* No indicator bar. The activity bar sits flush against the window, so a rule
+ * down its left edge reads as a border on the window rather than as a mark on
+ * the open pane. The icon's own brightness says which one that is. */
+.monaco-workbench .activitybar .active-item-indicator {
+  display: none !important;
+}
+
+/* Icon hover — accent tint with smooth transition */
+.monaco-workbench .activitybar .action-item .action-label {
+  transition: color var(--hanzo-transition), filter var(--hanzo-transition), transform var(--hanzo-transition) !important;
+}
+
+.monaco-workbench .activitybar .action-item:hover .action-label {
+  color: var(--hanzo-text-secondary) !important;
+  filter: none;
+  transform: scale(1.05);
+}
+
+/* Activity bar badge — accent pill */
+.monaco-workbench .activitybar .badge .badge-content {
+  background: var(--hanzo-accent) !important;
+  color: #000 !important;
+  font-weight: 600;
+  font-size: 9px;
+  border-radius: 10px;
+  box-shadow: 0 0 3px var(--hanzo-accent-glow);
+}
+
+/* Hanzo injected activity bar icons (Memory, Extensions, etc.) */
+#hanzo-palace-icon,
+[id^="hanzo-"] {
+  pointer-events: auto !important;
+  opacity: 0.6;
+  transition: opacity var(--hanzo-transition), color var(--hanzo-transition) !important;
+  z-index: 1;
+}
+
+#hanzo-palace-icon:hover,
+[id^="hanzo-"]:hover {
+  opacity: 1 !important;
+  color: var(--hanzo-accent) !important;
+}
+
+/* ── Sidebar (D2) ──────────────────────────────────────────────────────────── */
+
+.monaco-workbench .part.sidebar {
+  background: var(--hanzo-surface) !important;
+  border-right: none !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar section headers — visible raised surface */
+.monaco-workbench .pane-header {
+  background: var(--hanzo-surface) !important;
+  border-bottom: 1px solid var(--hanzo-border-subtle) !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em;
+  transition: background var(--hanzo-transition), box-shadow var(--hanzo-transition);
+}
+
+.monaco-workbench .pane-header:hover {
+  background: var(--hanzo-surface-hover) !important;
+  box-shadow: none !important;
+}
+
+/* File tree — more breathing room */
+.monaco-workbench .explorer-viewlet .monaco-list .monaco-list-row {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+}
+
+/* Explorer: selected file — accent left border + subtle background */
+.monaco-workbench .monaco-list .monaco-list-row.selected {
+  background: var(--hanzo-accent-subtle) !important;
+  border-left: 2px solid var(--hanzo-accent) !important;
+}
+
+/* Explorer: focused file */
+.monaco-workbench .monaco-list .monaco-list-row.focused {
+  background: var(--hanzo-accent-bg) !important;
+  border-left: 2px solid var(--hanzo-accent) !important;
+}
+
+/* Explorer: hovered file — smooth */
+.monaco-workbench .monaco-list .monaco-list-row {
+  transition: background var(--hanzo-transition-fast), border-left var(--hanzo-transition-fast) !important;
+  border-left: 2px solid transparent !important;
+}
+
+.monaco-workbench .monaco-list .monaco-list-row:hover {
+  background: var(--hanzo-surface-hover) !important;
+}
+
+/* Folder chevron — smooth rotation */
+.monaco-workbench .monaco-tl-twistie {
+  transition: transform 0.15s ease !important;
+}
+
+/* Collapsed: chevron points right ▶ (0deg = default icon orientation) */
+.monaco-workbench .monaco-tl-twistie.collapsible.collapsed {
+  transform: rotate(0deg);
+}
+
+/* Expanded: chevron rotates down ▼ */
+.monaco-workbench .monaco-tl-twistie.collapsible:not(.collapsed) {
+  transform: rotate(90deg);
+}
+
+/* Sidebar title actions — subtle on hover */
+.monaco-workbench .part.sidebar .title-actions .action-label {
+  transition: color var(--hanzo-transition), opacity var(--hanzo-transition) !important;
+  opacity: 0.6;
+}
+
+.monaco-workbench .part.sidebar .title-actions .action-label:hover {
+  opacity: 1;
+  color: var(--hanzo-accent) !important;
+}
+
+/* Auxiliary sidebar (chat panel) — visible depth */
+.monaco-workbench .part.auxiliarybar {
+  background: var(--hanzo-surface) !important;
+  border-left: none !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar border — prevent accent bleeds */
+
+/* The sash (resize handle between panels). Invisible until you reach for it;
+ * VS Code also paints one from `sash.hoverBorder`, so that is off too. */
+.monaco-workbench .monaco-sash,
+.monaco-workbench .monaco-sash::before,
+.monaco-workbench .monaco-sash::after {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: background var(--hanzo-transition) !important;
+}
+
+.monaco-workbench .monaco-sash:hover,
+.monaco-workbench .monaco-sash.active {
+  background: var(--hanzo-border) !important;
+  box-shadow: none !important;
+}
+
+/* ── Editor Tabs (D3) ──────────────────────────────────────────────────────── */
+
+/* Tab bar background — visible raised gradient */
+.monaco-workbench .part.editor > .content .editor-group-container > .title {
+  background: var(--hanzo-surface) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--hanzo-border-subtle) !important;
+}
+
+/* All tabs — smooth transitions */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab {
+  transition: background var(--hanzo-transition), color var(--hanzo-transition), border-color var(--hanzo-transition) !important;
+  border-top: 2px solid transparent !important;
+  border-bottom: none !important;
+}
+
+/* Active tab — accent top border, elevated background */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active {
+  border-top: 2px solid var(--hanzo-accent) !important;
+  background: var(--hanzo-bg) !important;
+  color: var(--hanzo-text) !important;
+  box-shadow: 0 -1px 0 var(--hanzo-accent-glow) !important;
+}
+
+/* Active tab label — slightly brighter */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab.active .tab-label a {
+  color: var(--hanzo-text) !important;
+}
+
+/* Inactive tabs — muted */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active) {
+  background: var(--hanzo-surface) !important;
+  color: var(--hanzo-text-muted) !important;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active) .tab-label a {
+  color: var(--hanzo-text-muted) !important;
+}
+
+/* Tab hover — subtle accent glow underneath */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):hover {
+  background: var(--hanzo-surface-hover) !important;
+  border-top-color: var(--hanzo-accent-glow) !important;
+}
+
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):hover .tab-label a {
+  color: var(--hanzo-text-secondary) !important;
+}
+
+/* Tab close button — fade in on hover */
+.monaco-workbench .part.editor .tabs-container > .tab .tab-actions {
+  opacity: 0;
+  transition: opacity var(--hanzo-transition-fast) !important;
+}
+
+.monaco-workbench .part.editor .tabs-container > .tab:hover .tab-actions,
+.monaco-workbench .part.editor .tabs-container > .tab.active .tab-actions {
+  opacity: 1;
+}
+
+/* Close button hover — accent */
+.monaco-workbench .part.editor .tabs-container > .tab .tab-actions .action-label:hover {
+  color: var(--hanzo-accent) !important;
+  background: var(--hanzo-accent-subtle) !important;
+  border-radius: var(--hanzo-radius-xs) !important;
+}
+
+/* Modified dot — accent */
+.monaco-workbench .part.editor .tabs-container > .tab.dirty .tab-label::after {
+  color: var(--hanzo-accent) !important;
+}
+
+/* Modified dot — use a accent circle when close button is hidden */
+.monaco-workbench .part.editor .tabs-container > .tab.dirty:not(:hover) .tab-actions .action-label {
+  color: var(--hanzo-accent) !important;
+  opacity: 1 !important;
+}
+
+/* Tab border separator — very subtle */
+.monaco-workbench .part.editor .tabs-container > .tab {
+  border-right: none !important;
+}
+
+/* ── Status Bar ────────────────────────────────────────────────────────────── */
+
+.monaco-workbench .part.statusbar {
+  background: var(--hanzo-surface) !important;
+  border-top: 1px solid var(--hanzo-border-subtle) !important;
+  box-shadow: none !important;
+}
+
+.monaco-workbench .part.statusbar .statusbar-item a:hover {
+  background: var(--hanzo-surface-hover) !important;
+  transition: background var(--hanzo-transition);
+}
+
+/* ── Panel (Terminal, Problems, Output) ────────────────────────────────────── */
+
+.monaco-workbench .part.panel {
+  background: var(--hanzo-surface) !important;
+  border-top: 1px solid var(--hanzo-border-subtle) !important;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+.monaco-workbench .part.panel .panel-switcher-container .action-item.checked {
+  border-bottom-color: var(--hanzo-accent) !important;
+}
+
+/* ── Quick Input (Command Palette) ─────────────────────────────────────────── */
+
+.monaco-workbench .quick-input-widget {
+  background: var(--hanzo-surface-raised) !important;
+  border: 1px solid var(--hanzo-border-glow) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  border-radius: var(--hanzo-radius-lg) !important;
+}
+
+.monaco-workbench .quick-input-widget .quick-input-box input {
+  background: var(--hanzo-surface) !important;
+  border: 1px solid var(--hanzo-border) !important;
+  border-radius: var(--hanzo-radius-sm) !important;
+  transition: border-color var(--hanzo-transition);
+}
+
+.monaco-workbench .quick-input-widget .quick-input-box input:focus {
+  border-color: var(--hanzo-border-focus) !important;
+  box-shadow: var(--hanzo-shadow-glow-sm) !important;
+}
+
+.monaco-workbench .quick-input-widget .quick-input-list .monaco-list-row.focused {
+  background: var(--hanzo-accent-subtle) !important;
+}
+
+/* ── Notifications ─────────────────────────────────────────────────────────── */
+
+.monaco-workbench .notifications-list-container .notification-list-item {
+  background: var(--hanzo-surface-raised) !important;
+  border-radius: var(--hanzo-radius-md) !important;
+}
+
+/* ── Editor Widgets (Find, Hover, Suggest) ─────────────────────────────────── */
+
+.monaco-editor .find-widget {
+  background: var(--hanzo-surface-raised) !important;
+  border: 1px solid var(--hanzo-border) !important;
+  box-shadow: var(--hanzo-shadow-md) !important;
+  border-radius: var(--hanzo-radius-md) !important;
+}
+
+.monaco-editor .suggest-widget {
+  background: var(--hanzo-surface-raised) !important;
+  border: 1px solid var(--hanzo-border) !important;
+  border-radius: var(--hanzo-radius-md) !important;
+}
+
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused {
+  background: var(--hanzo-accent-subtle) !important;
+}
+
+/* ── Title Bar ─────────────────────────────────────────────────────────────── */
+
+.monaco-workbench .part.titlebar {
+  background: var(--hanzo-surface) !important;
+  border-bottom: 1px solid var(--hanzo-border-subtle) !important;
+  box-shadow: none !important;
+  /* The window frame is gone; the traffic lights float here instead, so the
+     row starts clear of them and the empty space drags the window. */
+  padding-left: 78px !important;
+  -webkit-app-region: drag;
+}
+
+/* Anything clickable in the title row must opt out of the drag region. */
+.monaco-workbench .part.titlebar .monaco-toolbar,
+.monaco-workbench .part.titlebar .action-item,
+.monaco-workbench .part.titlebar .command-center,
+.monaco-workbench .part.titlebar .monaco-workbench-title-actions,
+.monaco-workbench .part.titlebar a,
+.monaco-workbench .part.titlebar button,
+.monaco-workbench .part.titlebar input {
+  -webkit-app-region: no-drag;
+}
+
+/* ── Breadcrumbs (D3) ──────────────────────────────────────────────────────── */
+
+.monaco-workbench .breadcrumbs-control {
+  background: var(--hanzo-bg) !important;
+  padding: 2px 8px !important;
+}
+
+.monaco-workbench .breadcrumbs-control .monaco-breadcrumb-item {
+  color: var(--hanzo-text-muted) !important;
+  font-size: var(--hanzo-font-size-sm) !important;
+  transition: color var(--hanzo-transition) !important;
+}
+
+.monaco-workbench .breadcrumbs-control .monaco-breadcrumb-item:hover {
+  color: var(--hanzo-text-secondary) !important;
+}
+
+.monaco-workbench .breadcrumbs-control .monaco-breadcrumb-item.focused {
+  color: var(--hanzo-accent) !important;
+}
+
+/* Active (last) breadcrumb — brighter */
+.monaco-workbench .breadcrumbs-control .monaco-breadcrumb-item:last-child {
+  color: var(--hanzo-text) !important;
+}
+
+/* Breadcrumb separator — thinner, more muted */
+.monaco-workbench .breadcrumbs-control .codicon-breadcrumb-separator {
+  color: var(--hanzo-text-muted) !important;
+  opacity: 0.5;
+  font-size: 10px !important;
+}
+
+/* Breadcrumb dropdown */
+.monaco-workbench .breadcrumbs-control .monaco-breadcrumb-item .monaco-dropdown {
+  background: var(--hanzo-surface-raised) !important;
+  border: 1px solid var(--hanzo-border) !important;
+  border-radius: var(--hanzo-radius-md) !important;
+  box-shadow: var(--hanzo-shadow-md) !important;
+}
+
+/* ── Smooth transitions on interactive elements ────────────────────────────── */
+
+/* ── Buttons with depth ────────────────────────────────────────────────────── */
+
+.monaco-workbench .monaco-button,
+.monaco-workbench .monaco-text-button {
+  transition: background var(--hanzo-transition), border-color var(--hanzo-transition) !important;
+  background: var(--hanzo-surface-raised) !important;
+  color: var(--hanzo-text) !important;
+  border: 1px solid var(--hanzo-border) !important;
+  border-radius: var(--hanzo-radius-sm) !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+}
+
+.monaco-workbench .monaco-button:hover,
+.monaco-workbench .monaco-text-button:hover {
+  background: var(--hanzo-surface-hover) !important;
+  border-color: var(--hanzo-accent-dim) !important;
+}
+
+.monaco-workbench .monaco-button:active,
+.monaco-workbench .monaco-text-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Inputs and selects with depth */
+.monaco-workbench input,
+.monaco-workbench select {
+  transition: all var(--hanzo-transition) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border-radius: var(--hanzo-radius-sm) !important;
+}
+
+.monaco-workbench input:focus,
+.monaco-workbench select:focus {
+  border-color: var(--hanzo-border-focus) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--hanzo-border-focus), 0 0 8px rgba(255, 255, 255, 0.1) !important;
+}
+
+.monaco-workbench .action-item .action-label {
+  transition: all var(--hanzo-transition) !important;
+}
+
+/* ── Find-input highlight ────────────────────────────────────────────────
+ * Upstream VS Code flashes the find input yellow. Restate the keyframes in
+ * the Hanzo accent so nothing in the IDE flashes yellow. */
+@keyframes monaco-findInput-highlight-0 {
+  0%   { background: rgba(255, 255, 255, 0.8); }
+  to   { background: transparent; }
+}
+@keyframes monaco-findInput-highlight-1 {
+  0%   { background: rgba(255, 255, 255, 0.8); }
+  to   { background: transparent; }
+}
+
+/* ── Account ───────────────────────────────────────────────────────────────
+ * Sits at the right end of the title row, opposite the traffic lights. */
+.monaco-workbench .part.titlebar .hanzo-account {
+  margin-left: auto;
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.monaco-workbench .part.titlebar .hanzo-account-btn {
+  background: transparent;
+  border: 1px solid var(--hanzo-border);
+  border-radius: var(--hanzo-radius-md);
+  color: var(--hanzo-text-secondary);
+  font-family: var(--hanzo-font-ui);
+  font-size: var(--hanzo-font-size-sm);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: color var(--hanzo-transition-fast), border-color var(--hanzo-transition-fast);
+}
+
+.monaco-workbench .part.titlebar .hanzo-account-btn:hover:not(:disabled) {
+  color: var(--hanzo-text);
+  border-color: var(--hanzo-accent-dim);
+}
+
+.monaco-workbench .part.titlebar .hanzo-account-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ── Title row alignment ───────────────────────────────────────────────────
+ * The command centre and the layout toggles share one row, so both centre on
+ * it rather than each sitting at its own height. */
+.monaco-workbench .part.titlebar > .titlebar-container {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.monaco-workbench .part.titlebar .titlebar-right,
+.monaco-workbench .part.titlebar .action-toolbar-container,
+.monaco-workbench .part.titlebar .monaco-toolbar,
+.monaco-workbench .part.titlebar .actions-container {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+.monaco-workbench .part.titlebar .action-item .action-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ── Part seams ────────────────────────────────────────────────────────────
+ * The workbench draws a 1px rule down the right edge of the activity bar and
+ * the sidebar, and paints some of them on pseudo-elements where a colour
+ * token cannot reach. Panels differ from the editor by surface value, so none
+ * of these lines are load-bearing. */
+.monaco-workbench .part.activitybar,
+.monaco-workbench .part.sidebar,
+.monaco-workbench .part.auxiliarybar,
+.monaco-workbench .part.panel,
+.monaco-workbench .part.editor,
+.monaco-workbench .part.activitybar::before,
+.monaco-workbench .part.sidebar::before,
+.monaco-workbench .part.auxiliarybar::before,
+.monaco-workbench .part.activitybar::after,
+.monaco-workbench .part.sidebar::after,
+.monaco-workbench .part.auxiliarybar::after,
+.monaco-workbench .split-view-view::before,
+.monaco-workbench .split-view-view::after {
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.monaco-workbench .monaco-split-view2 > .sash-container > .monaco-sash::before,
+.monaco-workbench .monaco-split-view2 > .sash-container > .monaco-sash::after {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* ── Native panes ──────────────────────────────────────────────────────────
+ * Our own views carry their identity in the activity-bar icon and their own
+ * content; the composite title above them repeats the word and costs a row.
+ * VS Code's own views (Explorer, Search, SCM) keep theirs. */
+.monaco-workbench .part.auxiliarybar .composite.title > .title-label {
+  display: none !important;
+}
+
+.monaco-workbench .part.auxiliarybar .composite.title {
+  padding-left: 10px !important;
+}

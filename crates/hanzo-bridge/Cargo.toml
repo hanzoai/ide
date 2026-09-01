@@ -1,0 +1,19 @@
+[package]
+name = "hanzo-bridge"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Hanzo ↔ Hanzo AI bridge — hook implementations for IDE-specific behavior"
+
+[dependencies]
+# Hanzo engine (for traits and types)
+hanzo-engine = { path = "../hanzo-engine", default-features = false }
+
+# Shared workspace deps
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+log.workspace = true
+uuid.workspace = true
+async-trait.workspace = true
+chrono = "0.4"

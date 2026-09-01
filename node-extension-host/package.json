@@ -1,0 +1,17 @@
+{
+  "name": "hanzo-extension-host",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node.js sidecar that runs VS Code extensions for Hanzo",
+  "main": "dist/bootstrap.js",
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').writeFileSync('dist/package.json','{\\\"type\\\":\\\"commonjs\\\"}\\n')\"",
+    "dev": "tsc --watch",
+    "pretest": "npm run build",
+    "test": "node test/smoke.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^22.0.0"
+  }
+}

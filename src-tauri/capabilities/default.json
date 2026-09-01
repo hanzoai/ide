@@ -1,0 +1,192 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Hanzo file system and core permissions",
+  "windows": ["main", "hanzo-chat-detached"],
+  "local": true,
+  "remote": {
+    "urls": ["http://localhost:*"]
+  },
+  "permissions": [
+    "core:default",
+    "fs:default",
+    "fs:scope-home-recursive",
+    "fs:scope-desktop-recursive",
+    "fs:scope-download-recursive",
+    "fs:scope-document-recursive",
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-rename",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-lstat",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$HOME/**/.*" },
+        { "path": "$HOME/**/.*/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DESKTOP/**/.*" },
+        { "path": "$DESKTOP/**/.*/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOCUMENT/**/.*" },
+        { "path": "$DOCUMENT/**/.*/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$DOWNLOAD/**/.*" },
+        { "path": "$DOWNLOAD/**/.*/**" }
+      ]
+    },
+    "dialog:default",
+    "dialog:allow-open",
+    "shell:default",
+    "shell:allow-open"
+  ]
+}

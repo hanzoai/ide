@@ -1,0 +1,12 @@
+Hanzo
+Copyright 2026 Hanzo AI Inc.
+
+This product includes software developed at Hanzo AI Inc., licensed under the
+Apache License, Version 2.0 (see LICENSE).
+
+This product redistributes third-party software, including the Visual Studio
+Code workbench (Code - OSS, Copyright (c) Microsoft Corporation, MIT licence)
+by way of @codingame/monaco-vscode-api, and jschardet (LGPL 2.1 or later).
+
+The complete list of redistributed software, with the licence for each, is in
+THIRD-PARTY-NOTICES.md.

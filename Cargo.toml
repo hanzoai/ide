@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "src-tauri",
+    "hanzo-sandbox",
+    "crates/hanzo-bridge",
+    "crates/hanzo-shell",
+    "crates/hanzo-ai",
+    "crates/hanzo-engine",
+]
+
+# Shared dependency versions — members use `dep.workspace = true`
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+log = "0.4"
+uuid = { version = "1", features = ["v4"] }
+async-trait = "0.1"

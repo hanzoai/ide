@@ -1,0 +1,83 @@
+/* ── Hanzo Design Tokens ──────────────────────────────────────────────────────
+ * The single source of truth for Hanzo's visual language.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Backgrounds ─────────────────────────────────────────────────────
+   * A neutral ramp off the Hanzo black. No hue: any cast reads as a
+   * second brand colour under large areas of grey. */
+  --hanzo-bg:              #000000;       /* deepest — editor background */
+  --hanzo-surface:         #111111;       /* panels — sidebar, activity bar */
+  --hanzo-surface-raised:  #1a1a1a;       /* elevated — cards, dropdowns, headers */
+  --hanzo-surface-hover:   #222222;       /* hover state */
+  --hanzo-surface-active:  #2a2a2a;       /* active/pressed */
+  --hanzo-surface-card:    #161616;       /* card backgrounds */
+
+  /* ── Gradient stops ────────────────────────────────────────────────── */
+  --hanzo-grad-light:      #1f1f1f;       /* lighter end of panel gradients */
+  --hanzo-grad-mid:        #151515;       /* middle */
+  --hanzo-grad-dark:       #0b0b0b;       /* darker end */
+
+  /* ── Borders (visible luminous edges) ──────────────────────────────── */
+  --hanzo-border:          #2e2e2e;       /* standard borders */
+  --hanzo-border-subtle:   #1f1f1f;       /* subtle dividers */
+  /* Separators. A dark UI reads depth from surface value, not from bright
+   * hairlines — anything above ~0.06 white on black shows up as a drawn line. */
+  --hanzo-border-light:    rgba(255, 255, 255, 0.05);
+  --hanzo-border-glow:     rgba(255, 255, 255, 0.07);
+  --hanzo-border-focus:    rgba(216, 216, 216, 0.35);
+
+  /* ── Accent (Hanzo monochrome) ───────────────────────────────────────── */
+  --hanzo-accent:          #d8d8d8;
+  --hanzo-accent-bright:   #ececec;
+  --hanzo-accent-dim:      #8a8a8a;
+  --hanzo-accent-glow:     rgba(216, 216, 216, 0.11);
+  --hanzo-accent-subtle:   rgba(255, 255, 255, 0.10);
+  --hanzo-accent-bg:       rgba(255, 255, 255, 0.06);
+
+  /* ── Text ────────────────────────────────────────────────────────────── */
+  --hanzo-text:            #e4e4e4;
+  --hanzo-text-secondary:  #949494;
+  --hanzo-text-muted:      #6b6b6b;
+  --hanzo-text-accent:     #d8d8d8;
+
+  /* ── Semantic ────────────────────────────────────────────────────────── */
+  --hanzo-success:         #4ade80;
+  --hanzo-error:           #f87171;
+  --hanzo-warning:         #fb923c;
+  --hanzo-info:            #60a5fa;
+
+  /* ── Radius ──────────────────────────────────────────────────────────── */
+  --hanzo-radius-xs:       2px;
+  --hanzo-radius-sm:       4px;
+  --hanzo-radius-md:       6px;
+  --hanzo-radius-lg:       8px;
+  --hanzo-radius-xl:       12px;
+  --hanzo-radius-round:    50%;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────── */
+  --hanzo-shadow-sm:       0 1px 3px rgba(0, 0, 0, 0.4);
+  --hanzo-shadow-md:       0 4px 12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --hanzo-shadow-lg:       0 8px 24px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --hanzo-shadow-glow:     0 0 10px var(--hanzo-accent-glow);
+  --hanzo-shadow-glow-sm:  0 0 5px var(--hanzo-accent-glow);
+  --hanzo-shadow-inset:    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+
+  /* ── Transitions ─────────────────────────────────────────────────────── */
+  --hanzo-transition-fast:    0.1s ease;
+  --hanzo-transition:         0.2s ease;
+  --hanzo-transition-slow:    0.3s ease;
+  --hanzo-transition-spring:  0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Typography ──────────────────────────────────────────────────────── */
+  --hanzo-font-ui:         'Zen', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --hanzo-font-mono:       'Zen Mono', 'SF Mono', ui-monospace, monospace;
+  --hanzo-font-size-xs:    10px;
+  --hanzo-font-size-sm:    11px;
+  --hanzo-font-size-md:    12px;
+  --hanzo-font-size-base:  13px;
+  --hanzo-font-size-lg:    14px;
+  --hanzo-font-size-xl:    16px;
+  --hanzo-font-size-2xl:   20px;
+  --hanzo-line-height:     1.5;
+}
