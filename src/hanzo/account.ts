@@ -16,7 +16,37 @@ const POLL_MS = 1500
 const POLL_LIMIT = 120 // two minutes is longer than any browser round-trip
 
 async function status(): Promise<Account> {
-  return await invoke<Account>('auth_status')
+  const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
+  if (isTauri) {
+    try {
+      return await invoke<Account>('auth_status')
+    } catch {
+      // fallback
+    }
+  }
+  // Browser mode: check localStorage or cookies
+  try {
+    const raw = localStorage.getItem('hanzo:user') || localStorage.getItem('hanzo_user')
+    if (raw) {
+      const u = JSON.parse(raw)
+      return {
+        identity: u.name || u.email || u.sub || 'Hanzo User',
+        org: u.org || u.org_id || 'hanzo',
+        signed_in: true,
+      }
+    }
+    const token = localStorage.getItem('hanzo:token') || localStorage.getItem('hanzo_token')
+    if (token) {
+      return {
+        identity: 'Signed in',
+        org: 'hanzo',
+        signed_in: true,
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return { identity: null, org: null, signed_in: false }
 }
 
 /** Wait for the browser half of the sign-in to land, then stop. */
@@ -61,29 +91,42 @@ export async function registerAccount(): Promise<void> {
       btn.title = a.org ? `Signed in to ${a.org} — click to sign out` : 'Click to sign out'
       btn.onclick = async () => {
         btn.disabled = true
-        try {
-          await invoke('auth_logout')
-          render(await status())
-        } catch (e) {
-          btn.textContent = String(e)
-        } finally {
-          btn.disabled = false
+        const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
+        if (isTauri) {
+          try {
+            await invoke('auth_logout')
+          } catch (e) {
+            console.warn('Logout error:', e)
+          }
         }
+        try {
+          localStorage.removeItem('hanzo:user')
+          localStorage.removeItem('hanzo_user')
+          localStorage.removeItem('hanzo:token')
+          localStorage.removeItem('hanzo_token')
+        } catch {}
+        render(await status())
+        btn.disabled = false
       }
     } else {
       btn.textContent = 'Sign In'
       btn.title = 'Sign in through Hanzo IAM'
       btn.onclick = async () => {
         btn.disabled = true
-        btn.textContent = 'Continue in browser…'
-        try {
-          await invoke('auth_login')
-          await awaitSignIn(render)
-        } catch (e) {
-          btn.textContent = 'Sign In'
-          btn.title = String(e)
-        } finally {
-          btn.disabled = false
+        const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
+        if (isTauri) {
+          btn.textContent = 'Continue in browser…'
+          try {
+            await invoke('auth_login')
+            await awaitSignIn(render)
+          } catch (e) {
+            btn.textContent = 'Sign In'
+            btn.title = String(e)
+          } finally {
+            btn.disabled = false
+          }
+        } else {
+          window.location.href = `https://identity.hanzo.ai/login?redirect_uri=${encodeURIComponent(window.location.href)}`
         }
       }
     }

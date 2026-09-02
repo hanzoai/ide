@@ -163,16 +163,15 @@ export async function initializeWorkbench(): Promise<void> {
   // ─── Wait for Tauri IPC bridge to be ready ────────────────────────────────
   setLoadingStatus('Waiting for Tauri IPC...')
   let ipcWaitMs = 0
+  const maxIpcWait = (window as any).__TAURI_INTERNALS__ ? 2000 : 150
   await new Promise<void>((resolve) => {
     const check = () => {
       if ((window as any).__TAURI_INTERNALS__?.invoke) {
         resolve()
       } else {
         ipcWaitMs += 10
-        if (ipcWaitMs % 1000 === 0) setLoadingStatus(`Waiting for Tauri IPC... ${ipcWaitMs/1000}s`)
-        if (ipcWaitMs > 10000) {
-          // IPC never came — proceed anyway (browser mode / stale binary)
-          console.warn('[hanzo] Tauri IPC not available after 10s, proceeding without it')
+        if (ipcWaitMs > maxIpcWait) {
+          // Browser mode / non-Tauri host
           resolve()
           return
         }

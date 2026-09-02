@@ -163,27 +163,95 @@ export async function doSend(): Promise<void> {
   S.sessionId = sessionId
 
   try {
-    const response = await invoke<ChatResponse>('engine_chat_send', {
-      request: {
-        session_id: sessionId,
-        message: fullMessage,
-        system_prompt: systemPrompt,
-        agent_id: S.selectedAgent?.agent_id ?? undefined,
-        model: S.selectedModel ?? undefined,
-        tools_enabled: !S.planMode,
-        auto_approve_all: S.approvalMode === 'auto',
-        thinking_level: S.thinkingLevel,
-        workspace_path: getWorkspace() ?? undefined,
-        is_redirect: isMidStreamRedirect || isDeepSession,
-        attachments: chatAttachments,
-      },
-    })
-    // Engine echoes back the same session_id; reassigning is a no-op but
-    // keeps us aligned if the backend ever decides to migrate sessions.
-    S.sessionId = response.session_id
-    // Always update runId — on redirect, old complete events won't match new runId
-    // so they'll be filtered, and the existing streaming bubble continues for the new run
-    S.runId = response.run_id
+    let response: ChatResponse | null = null
+    const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
+    if (isTauri) {
+      try {
+        response = await invoke<ChatResponse>('engine_chat_send', {
+          request: {
+            session_id: sessionId,
+            message: fullMessage,
+            system_prompt: systemPrompt,
+            agent_id: S.selectedAgent?.agent_id ?? undefined,
+            model: S.selectedModel ?? undefined,
+            tools_enabled: !S.planMode,
+            auto_approve_all: S.approvalMode === 'auto',
+            thinking_level: S.thinkingLevel,
+            workspace_path: getWorkspace() ?? undefined,
+            is_redirect: isMidStreamRedirect || isDeepSession,
+            attachments: chatAttachments,
+          },
+        })
+      } catch (invokeErr) {
+        console.warn('[hanzo-chat] local invoke failed, falling back to cloud:', invokeErr)
+      }
+    }
+
+    if (!response) {
+      // Cloud agentic streaming via api.hanzo.ai
+      const token = localStorage.getItem('hanzo:token') || localStorage.getItem('hanzo_token') || ''
+      const cloudRes = await fetch('https://api.hanzo.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          model: S.selectedModel || 'enso-auto',
+          messages: [
+            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+            ...S.messages.map((m) => ({ role: m.role, content: m.content })),
+            { role: 'user', content: fullMessage },
+          ],
+          stream: true,
+        }),
+      })
+
+      if (!cloudRes.ok) {
+        throw new Error(`Cloud Agent error: ${cloudRes.status} ${cloudRes.statusText}`)
+      }
+
+      if (cloudRes.body) {
+        const reader = cloudRes.body.getReader()
+        const decoder = new TextDecoder()
+        let accumulated = ''
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          const chunk = decoder.decode(value, { stream: true })
+          const lines = chunk.split('\n')
+          for (const line of lines) {
+            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+              try {
+                const parsed = JSON.parse(line.slice(6))
+                const delta = parsed.choices?.[0]?.delta?.content || ''
+                if (delta) {
+                  accumulated += delta
+                  if (S.streamingBubble) {
+                    const contentEl = S.streamingBubble.querySelector('.hanzo-bubble-content')
+                    if (contentEl) contentEl.textContent = accumulated
+                  }
+                }
+              } catch {}
+            }
+          }
+        }
+        response = {
+          session_id: sessionId,
+          run_id: `run-${Date.now()}`,
+          message: accumulated,
+          finish_reason: 'stop',
+        } as any
+        S.messages.push({ role: 'assistant', content: accumulated, ts: new Date() })
+        setStreaming(false)
+        renderMessages()
+      }
+    }
+
+    if (response) {
+      S.sessionId = response.session_id
+      S.runId = response.run_id
+    }
     // Refresh session list
     import('./index.ts').then(({ loadSessions }) => loadSessions().catch(() => {}))
   } catch (err) {
