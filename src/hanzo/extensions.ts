@@ -311,7 +311,7 @@ function injectStyles(): void {
       height: 100%;
       min-height: 0;
       background: var(--vscode-sideBar-background);
-      font-family: var(--hanzo-font-ui);
+      font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       color: var(--vscode-foreground);
       overflow: hidden;
     }

@@ -158,10 +158,7 @@ export async function initializeWorkbench(): Promise<void> {
   if (loading) {
     const statusEl = document.createElement('div')
     statusEl.id = 'hanzo-load-status'
-    statusEl.style.cssText = 'margin-top:12px;font-size:11px;color:#888;font-family:var(--hanzo-font-mono)'
-    statusEl.textContent = 'Waiting for IPC...'
-    loading.querySelector('.loading-inner')?.appendChild(statusEl)
-  }
+    statusEl.style.cssText = 'margin-top:12px;font-size:11px;color:#888;font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
 
   // ─── Wait for Tauri IPC bridge to be ready ────────────────────────────────
   setLoadingStatus('Waiting for Tauri IPC...')
