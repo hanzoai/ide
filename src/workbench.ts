@@ -7,6 +7,7 @@
 
 // ─── Hanzo Design System ─────────────────────────────────────────────────────
 import './styles/tokens.css'
+import { tauri } from './hanzo/tauri.ts'
 import './styles/overrides.css'
 
 // ─── Default Extensions (must import before anything else) ──────────────────
@@ -158,7 +159,10 @@ export async function initializeWorkbench(): Promise<void> {
   if (loading) {
     const statusEl = document.createElement('div')
     statusEl.id = 'hanzo-load-status'
-    statusEl.style.cssText = 'margin-top:12px;font-size:11px;color:#888;font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+    statusEl.style.cssText = 'margin-top:12px;font-size:11px;color:#888;font-family:var(--hanzo-font-mono)'
+    statusEl.textContent = 'Waiting for IPC...'
+    loading.querySelector('.loading-inner')?.appendChild(statusEl)
+  }
 
   // ─── Wait for Tauri IPC bridge to be ready ────────────────────────────────
   setLoadingStatus('Waiting for Tauri IPC...')
@@ -404,7 +408,7 @@ export async function initializeDeferredFeatures(): Promise<void> {
     await registerFormatCommand()
     await registerInstallCommand()
     // Register known adapters + scan installed extensions after MCP registry initializes
-    setTimeout(async () => {
+    if (tauri()) setTimeout(async () => {
       await registerExtensionAdapters().catch((e) =>
         console.warn('[hanzo] Extension adapter registration failed:', e),
       )
@@ -557,7 +561,7 @@ export async function initializeDeferredFeatures(): Promise<void> {
     const ws = getWorkspace()
     console.log('[hanzo] Extension host: workspace =', ws ?? '(none, using user-home)')
     let extDir: string | undefined
-    try {
+    if (tauri()) try {
       const { homeDir } = await import('@tauri-apps/api/path')
       const home = (await homeDir()).replace(/[\\/]+$/, '')
       if (home) extDir = `${home}/.hanzo/extensions`
@@ -571,7 +575,7 @@ export async function initializeDeferredFeatures(): Promise<void> {
     // empty array we already return in that case.
     const wsForHost = ws || ''
     console.log('[hanzo] Extension host: extDir =', extDir)
-    startExtensionHost(wsForHost, extDir).catch((e) => {
+    if (tauri()) startExtensionHost(wsForHost, extDir).catch((e) => {
       console.warn('[hanzo] Extension host failed to start:', e)
     })
   } catch (e) {

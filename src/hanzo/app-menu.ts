@@ -63,7 +63,7 @@ async function openFilePicker(): Promise<void> {
  * Wire the native menu to the workbench. Call once after the workbench boots.
  */
 export async function listenForMenuActions(): Promise<void> {
-  const { listen } = await import('@tauri-apps/api/event')
+  const { listen } = await import('./tauri.ts')
   await listen<string>('menu-action', async (event) => {
     const id = event.payload
     if (!id) return

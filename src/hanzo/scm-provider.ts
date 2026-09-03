@@ -155,7 +155,7 @@ export async function initScmProvider(workspacePath: string): Promise<void> {
   await refreshStatus()
 
   // Listen for file system changes from the Rust watcher to trigger refresh
-  const { listen } = await import('@tauri-apps/api/event')
+  const { listen } = await import('./tauri.ts')
   let _refreshTimer: ReturnType<typeof setTimeout> | null = null
   await listen('fs-change', () => {
     // Debounce: wait 500ms after last change before refreshing

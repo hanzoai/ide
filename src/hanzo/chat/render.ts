@@ -31,7 +31,9 @@ export function linkifyPaths(html: string): string {
     (_m, codeBlock, path) => {
       if (codeBlock) return codeBlock
       const name = path.split('/').pop() || path
-      return `<span class="hanzo-path-link" data-fspath="${path}" title="${path}" style="display:inline-flex;align-items:center;gap:3px;background:rgba(77,170,252,0.08);color:var(--vscode-textLink-foreground,#4daafc);cursor:pointer;border-radius:4px;padding:1px 6px 1px 4px;font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:0.85em;border:1px solid rgba(77,170,252,0.18);vertical-align:middle;white-space:nowrap"><span class="codicon codicon-file-code" style="font-size:10px;opacity:0.8"></span>${name}</span>`
+      const safePath = escapeHtml(path).replace(/"/g, '&quot;')
+      const safeName = escapeHtml(name)
+      return `<span class="hanzo-path-link" data-fspath="${safePath}" title="${safePath}"><span class="codicon codicon-file-code" aria-hidden="true"></span><span>${safeName}</span></span>`
     },
   )
 }
@@ -107,50 +109,50 @@ export function sliceDiffContext(lines: DiffLine[], ctx = 3): DiffLine[] {
 
 export function styleCodeBlocks(el: HTMLElement): void {
   el.querySelectorAll('pre').forEach((pre) => {
+    if (pre.parentElement?.classList.contains('hanzo-code-shell')) return
+
     const wrapper = document.createElement('div')
-    wrapper.style.cssText = 'position:relative;margin:6px 0'
-    ;(pre as HTMLElement).style.cssText = 'background:var(--vscode-textCodeBlock-background,#1e1e1e);border:1px solid var(--vscode-widget-border,#333);border-radius:4px;padding:10px 12px;overflow-x:auto;font-size:12px;margin:0'
+    wrapper.className = 'hanzo-code-shell'
 
     const btnRow = document.createElement('div')
-    btnRow.style.cssText = 'position:absolute;top:4px;right:4px;display:flex;gap:2px;opacity:0;transition:opacity 0.15s'
+    btnRow.className = 'hanzo-code-actions'
 
     const copyBtn = document.createElement('button')
-    copyBtn.textContent = 'Copy'
-    copyBtn.style.cssText = 'background:var(--vscode-button-background);color:var(--vscode-button-foreground);border:none;border-radius:3px;padding:2px 8px;font-size:10px;cursor:pointer'
+    copyBtn.type = 'button'
+    copyBtn.className = 'hanzo-code-action'
+    copyBtn.title = 'Copy code'
+    copyBtn.innerHTML = '<span class="codicon codicon-copy" aria-hidden="true"></span><span>Copy</span>'
     copyBtn.addEventListener('click', () => {
       const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
-      navigator.clipboard.writeText(code)
-      copyBtn.textContent = 'Copied!'
-      setTimeout(() => { copyBtn.textContent = 'Copy' }, 1500)
+      navigator.clipboard.writeText(code).catch(() => {})
+      copyBtn.innerHTML = '<span class="codicon codicon-check" aria-hidden="true"></span><span>Copied</span>'
+      setTimeout(() => {
+        copyBtn.innerHTML = '<span class="codicon codicon-copy" aria-hidden="true"></span><span>Copy</span>'
+      }, 1500)
     })
 
     const applyBtn = document.createElement('button')
-    applyBtn.textContent = 'Apply'
-    applyBtn.style.cssText = 'background:#2ea043;color:white;border:none;border-radius:3px;padding:2px 8px;font-size:10px;cursor:pointer'
+    applyBtn.type = 'button'
+    applyBtn.className = 'hanzo-code-action'
+    applyBtn.title = 'Apply code to the active editor'
+    applyBtn.innerHTML = '<span class="codicon codicon-insert" aria-hidden="true"></span><span>Apply</span>'
     applyBtn.addEventListener('click', async () => {
       const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
       const applied = await applyCodeToEditor(code)
-      if (applied) {
-        applyBtn.textContent = 'Applied!'
-        setTimeout(() => { applyBtn.textContent = 'Apply' }, 1500)
-      } else {
-        navigator.clipboard.writeText(code)
-        applyBtn.textContent = 'Copied!'
-        setTimeout(() => { applyBtn.textContent = 'Apply' }, 1500)
-      }
+      if (!applied) await navigator.clipboard.writeText(code).catch(() => {})
+      applyBtn.innerHTML = applied
+        ? '<span class="codicon codicon-check" aria-hidden="true"></span><span>Applied</span>'
+        : '<span class="codicon codicon-copy" aria-hidden="true"></span><span>Copied</span>'
+      setTimeout(() => {
+        applyBtn.innerHTML = '<span class="codicon codicon-insert" aria-hidden="true"></span><span>Apply</span>'
+      }, 1500)
     })
 
     btnRow.appendChild(copyBtn)
     btnRow.appendChild(applyBtn)
-    wrapper.addEventListener('mouseenter', () => { btnRow.style.opacity = '1' })
-    wrapper.addEventListener('mouseleave', () => { btnRow.style.opacity = '0' })
     pre.parentNode?.insertBefore(wrapper, pre)
     wrapper.appendChild(pre)
     wrapper.appendChild(btnRow)
-  })
-
-  el.querySelectorAll('code:not(pre code)').forEach((c) => {
-    ;(c as HTMLElement).style.cssText = 'background:var(--vscode-textCodeBlock-background,#1e1e1e);padding:1px 5px;border-radius:3px;font-size:12px'
   })
 }
 
@@ -158,10 +160,12 @@ export function styleCodeBlocks(el: HTMLElement): void {
 
 export function makeFeedbackBtn(iconCls: string, action: string, msg: ChatMsg): HTMLButtonElement {
   const btn = document.createElement('button')
-  btn.innerHTML = `<span class="codicon ${iconCls}" style="font-size:12px"></span>`
-  btn.style.cssText = 'background:transparent;border:none;cursor:pointer;padding:2px 4px;border-radius:3px;opacity:0.6;display:flex;align-items:center'
-  btn.addEventListener('mouseenter', () => { btn.style.opacity = '1'; btn.style.background = 'var(--vscode-toolbar-hoverBackground,rgba(255,255,255,0.1))' })
-  btn.addEventListener('mouseleave', () => { btn.style.opacity = '0.6'; btn.style.background = 'transparent' })
+  const labels: Record<string, string> = { copy: 'Copy response', up: 'Helpful', down: 'Not helpful' }
+  btn.type = 'button'
+  btn.className = 'hanzo-chat-feedback-button'
+  btn.title = labels[action] ?? action
+  btn.setAttribute('aria-label', labels[action] ?? action)
+  btn.innerHTML = `<span class="codicon ${iconCls}" aria-hidden="true"></span>`
   btn.addEventListener('click', () => {
     if (action === 'copy') {
       navigator.clipboard.writeText(msg.content)
@@ -177,7 +181,7 @@ export function makeFeedbackBtn(iconCls: string, action: string, msg: ChatMsg): 
           helpful: action === 'up',
         }).catch(console.error)
       }
-      btn.style.opacity = '1'
+      btn.setAttribute('aria-pressed', 'true')
     }
   })
   return btn
@@ -237,27 +241,23 @@ export function makeBubble(msg: ChatMsg): HTMLElement {
     card.appendChild(icon)
 
     const toolLabel = document.createElement('span')
-    toolLabel.style.cssText = 'font-size:11px;color:var(--vscode-descriptionForeground);font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace{
+    toolLabel.style.cssText = 'font-size:11px;color:var(--vscode-descriptionForeground);font-family:var(--hanzo-font-mono)'
+    toolLabel.textContent = msg.toolName || 'tool'
+    card.appendChild(toolLabel)
+
+    if (fname && msg.filePath) {
       const fileChip = document.createElement('span')
       fileChip.className = 'hanzo-path-link'
       fileChip.dataset.fspath = msg.filePath
       fileChip.title = msg.filePath
-      fileChip.style.cssText = [
-        'display:inline-flex',
-        'align-items:center',
-        'gap:3px',
-        'background:rgba(77,170,252,0.08)',
-        'color:var(--vscode-textLink-foreground,#4daafc)',
-        'border:1px solid rgba(77,170,252,0.18)',
-        'border-radius:4px',
-        'padding:0 5px 0 3px',
-        'font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;')
-      fileChip.innerHTML = `<span class="codicon codicon-file-code" style="font-size:9px;opacity:0.8"></span>${fname}`
+      fileChip.innerHTML = `<span class="codicon codicon-file-code" aria-hidden="true"></span><span>${escapeHtml(fname)}</span>`
       card.appendChild(fileChip)
 
       if (msg.linesAdded || msg.linesRemoved) {
         const stats = document.createElement('span')
-        stats.style.cssText = 'font-size:10px;font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace{msg.linesAdded}</span>` : '',
+        stats.style.cssText = 'font-size:10px;font-family:var(--hanzo-font-mono)'
+        stats.innerHTML = [
+          msg.linesAdded ? `<span style="color:#4ec9a8">+${msg.linesAdded}</span>` : '',
           msg.linesRemoved ? `<span style="color:#f48771"> −${msg.linesRemoved}</span>` : '',
         ].join('')
         card.appendChild(stats)
@@ -286,7 +286,12 @@ export function makeBubble(msg: ChatMsg): HTMLElement {
       const diffEl = document.createElement('div')
       diffEl.style.cssText = [
         'font-size:11px',
-        'font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;')
+        'font-family:var(--hanzo-font-mono)',
+        'border-radius:6px',
+        'overflow:hidden',
+        'border:1px solid var(--vscode-widget-border,rgba(255,255,255,0.08))',
+        'margin-bottom:3px',
+      ].join(';')
       for (const dl of msg.diffLines) {
         const row = document.createElement('div')
         const bg = dl.op === '+' ? 'rgba(78,201,168,0.12)' : dl.op === '-' ? 'rgba(244,135,113,0.12)' : 'transparent'

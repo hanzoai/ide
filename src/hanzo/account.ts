@@ -5,6 +5,8 @@
 // result — there is no second login path to keep in step.
 
 import { invoke } from '@tauri-apps/api/core'
+import { tauri } from './tauri.ts'
+import { session, signIn, signOut, user } from './iam.ts'
 
 interface Account {
   identity: string | null
@@ -16,37 +18,21 @@ const POLL_MS = 1500
 const POLL_LIMIT = 120 // two minutes is longer than any browser round-trip
 
 async function status(): Promise<Account> {
-  const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
-  if (isTauri) {
+  if (tauri()) {
     try {
       return await invoke<Account>('auth_status')
     } catch {
       // fallback
     }
   }
-  // Browser mode: check localStorage or cookies
-  try {
-    const raw = localStorage.getItem('hanzo:user') || localStorage.getItem('hanzo_user')
-    if (raw) {
-      const u = JSON.parse(raw)
-      return {
-        identity: u.name || u.email || u.sub || 'Hanzo User',
-        org: u.org || u.org_id || 'hanzo',
-        signed_in: true,
-      }
-    }
-    const token = localStorage.getItem('hanzo:token') || localStorage.getItem('hanzo_token')
-    if (token) {
-      return {
-        identity: 'Signed in',
-        org: 'hanzo',
-        signed_in: true,
-      }
-    }
-  } catch {
-    // ignore
+  // Outside the shell, IAM is the only thing that knows.
+  if (!session().authenticated) return { identity: null, org: null, signed_in: false }
+  const u = await user().catch(() => null)
+  return {
+    identity: u?.name || u?.email || 'Signed in',
+    org: u?.owner ?? null,
+    signed_in: true,
   }
-  return { identity: null, org: null, signed_in: false }
 }
 
 /** Wait for the browser half of the sign-in to land, then stop. */
@@ -91,20 +77,14 @@ export async function registerAccount(): Promise<void> {
       btn.title = a.org ? `Signed in to ${a.org} — click to sign out` : 'Click to sign out'
       btn.onclick = async () => {
         btn.disabled = true
-        const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
-        if (isTauri) {
+        if (tauri()) {
           try {
             await invoke('auth_logout')
           } catch (e) {
             console.warn('Logout error:', e)
           }
         }
-        try {
-          localStorage.removeItem('hanzo:user')
-          localStorage.removeItem('hanzo_user')
-          localStorage.removeItem('hanzo:token')
-          localStorage.removeItem('hanzo_token')
-        } catch {}
+        else await signOut().catch((e) => console.warn('Logout error:', e))
         render(await status())
         btn.disabled = false
       }
@@ -113,8 +93,7 @@ export async function registerAccount(): Promise<void> {
       btn.title = 'Sign in through Hanzo IAM'
       btn.onclick = async () => {
         btn.disabled = true
-        const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
-        if (isTauri) {
+        if (tauri()) {
           btn.textContent = 'Continue in browser…'
           try {
             await invoke('auth_login')
@@ -126,7 +105,7 @@ export async function registerAccount(): Promise<void> {
             btn.disabled = false
           }
         } else {
-          window.location.href = `https://identity.hanzo.ai/login?redirect_uri=${encodeURIComponent(window.location.href)}`
+          await signIn()
         }
       }
     }

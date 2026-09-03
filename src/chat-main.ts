@@ -17,9 +17,11 @@
  * deltas, tool requests, etc. without any extra plumbing.
  */
 import './styles/tokens.css'
+import './hanzo/chat/styles.css'
 
 import { invoke } from '@tauri-apps/api/core'
-import { emit, listen } from '@tauri-apps/api/event'
+import { emit, listen, tauri } from './hanzo/tauri.ts'
+import { finish } from './hanzo/iam.ts'
 
 import { S } from './hanzo/chat/state.ts'
 import type { ChatMsg } from './hanzo/chat/types.ts'
@@ -253,6 +255,7 @@ function buildDetachedChatUI(root: HTMLElement): void {
 }
 
 async function bootstrap(): Promise<void> {
+  if (!tauri()) await finish().catch((e) => console.warn('[hanzo-chat-detached] sign-in did not finish:', e))
   const root = document.getElementById('hanzo-chat-detached-root')
   if (!root) {
     console.error('[hanzo-chat-detached] root element missing')

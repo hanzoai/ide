@@ -7,9 +7,11 @@
  * Re-exports registerHanzoChat as the public API for workbench.ts.
  */
 
+import './styles.css'
+
 import { marked } from 'marked'
 import { invoke } from '@tauri-apps/api/core'
-import { listen, emit } from '@tauri-apps/api/event'
+import { emit, listen } from '../tauri.ts'
 import {
   registerCustomView,
   ViewContainerLocation,
@@ -187,245 +189,6 @@ async function attachGitDiff(textarea: HTMLTextAreaElement): Promise<void> {
   }
 }
 
-// ─── Chat Styles ─────────────────────────────────────────────────────────────
-
-const CHAT_STYLES = `
-  /* ── Animations ──────────────────────────────────────────── */
-  @keyframes hanzo-pulse { 0%,100%{opacity:0.2;transform:scaleY(0.8)} 50%{opacity:0.7;transform:scaleY(1.2)} }
-  @keyframes hanzo-blink { 0%,100%{opacity:0} 50%{opacity:0.5} }
-  @keyframes hanzo-slide-in { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
-  @keyframes hanzo-glow-pulse { 0%,100% { box-shadow: 0 0 4px rgba(255, 255, 255,0.2) } 50% { box-shadow: 0 0 12px rgba(255, 255, 255,0.35) } }
-
-  /* ── Chat container ──────────────────────────────────────── */
-  .hanzo-chat-container {
-    background: #0a0a0e !important;
-  }
-
-  /* ── Top bar ─────────────────────────────────────────────── */
-  .hanzo-chat-topbar {
-    background: #111116 !important;
-    border-bottom: 1px solid #252530 !important;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.5) !important;
-    padding: 10px 12px !important;
-  }
-  .hanzo-chat-topbar select {
-    background: #1a1a22 !important;
-    border: 1px solid #333340 !important;
-    border-radius: 8px !important;
-    color: #c0beb8 !important;
-    padding: 6px 10px !important;
-    font-size: 11px !important;
-    transition: all 0.2s !important;
-    cursor: pointer;
-  }
-  .hanzo-chat-topbar select:hover {
-    border-color: #444455 !important;
-  }
-  .hanzo-chat-topbar select:focus {
-    border-color: rgba(255, 255, 255,0.5) !important;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255,0.15), 0 0 12px rgba(255, 255, 255,0.08) !important;
-    outline: none !important;
-  }
-  .hanzo-chat-topbar button {
-    background: transparent !important;
-    border: 1px solid #333340 !important;
-    border-radius: 8px !important;
-    width: 30px !important;
-    height: 30px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    color: #666 !important;
-    transition: all 0.2s !important;
-  }
-  .hanzo-chat-topbar button:hover {
-    border-color: rgba(255, 255, 255,0.4) !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 10px rgba(255, 255, 255,0.12) !important;
-  }
-
-  /* ── Tool execution bar ──────────────────────────────────── */
-  .hanzo-chat-toolrow {
-    background: linear-gradient(90deg, rgba(255, 255, 255,0.05) 0%, transparent 60%) !important;
-    border-bottom: 1px solid rgba(255, 255, 255,0.1) !important;
-    padding: 6px 12px !important;
-  }
-
-  /* ── Progress log ────────────────────────────────────────── */
-  .hanzo-chat-progress {
-    background: #08080c !important;
-    border-bottom: 1px solid #1a1a24 !important;
-  }
-
-  /* ── Separator above input ───────────────────────────────── */
-  .hanzo-chat-separator {
-    height: 1px;
-    background: linear-gradient(90deg, transparent 5%, rgba(255, 255, 255,0.5) 30%, rgba(255, 255, 255,0.8) 50%, rgba(255, 255, 255,0.5) 70%, transparent 95%);
-    box-shadow: 0 0 8px rgba(255, 255, 255,0.15), 0 0 20px rgba(255, 255, 255,0.05);
-    flex-shrink: 0;
-  }
-
-  /* ── Input area ──────────────────────────────────────────── */
-  .hanzo-chat-input-area {
-    background: #0e0e14 !important;
-    padding: 12px 12px 14px !important;
-  }
-  .hanzo-chat-input-row {
-    background: #141420 !important;
-    border: 1px solid #2a2a38 !important;
-    border-radius: 14px !important;
-    transition: all 0.25s !important;
-    padding: 10px 14px !important;
-  }
-  .hanzo-chat-input-row:focus-within {
-    border-color: rgba(255, 255, 255,0.5) !important;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255,0.1), 0 0 20px rgba(255, 255, 255,0.08), 0 0 40px rgba(255, 255, 255,0.03) !important;
-  }
-
-  /* ── Send button — Hanzo mark ────────────────────── */
-  .hanzo-chat-send {
-    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 60%, #9a9aa2 100%) !important;
-    border: none !important;
-    border-radius: 10px !important;
-    width: 36px !important;
-    height: 36px !important;
-    box-shadow: 0 2px 8px rgba(255, 255, 255,0.35), 0 0 20px rgba(255, 255, 255,0.1) !important;
-    transition: all 0.2s !important;
-    cursor: pointer;
-    position: relative;
-  }
-  .hanzo-chat-send:hover {
-    box-shadow: 0 4px 20px rgba(255, 255, 255,0.5), 0 0 30px rgba(255, 255, 255,0.15) !important;
-    transform: translateY(-2px) scale(1.08);
-  }
-  .hanzo-chat-send:active {
-    transform: translateY(0) scale(0.96);
-    box-shadow: 0 1px 4px rgba(255, 255, 255,0.3) !important;
-  }
-
-  /* ── User message bubble ─────────────────────────────────── */
-  .hanzo-chat-user-bubble {
-    background: #151520 !important;
-    border: 1px solid rgba(255, 255, 255,0.2) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
-    animation: hanzo-slide-in 0.2s ease-out;
-  }
-
-  /* ── Assistant message — the main card with edge glow ────── */
-  .hanzo-chat-bubble {
-    animation: hanzo-slide-in 0.25s ease-out;
-    background: linear-gradient(180deg, rgba(255, 255, 255,0.06) 0%, rgba(16,16,22,0.95) 15%, #10101a 100%) !important;
-    border: 1px solid rgba(255, 255, 255,0.15) !important;
-    border-radius: 12px !important;
-    padding: 16px 18px !important;
-    margin: 4px 12px !important;
-    box-shadow:
-      0 0 15px rgba(255, 255, 255,0.05),
-      0 4px 12px rgba(0,0,0,0.3),
-      inset 0 1px 0 rgba(255, 255, 255,0.08) !important;
-  }
-
-  /* ── Assistant message bubble ─────────────────────────────── */
-  .hanzo-chat-bubble {
-    animation: hanzo-slide-in 0.25s ease-out;
-  }
-  .hanzo-chat-bubble ul, .hanzo-chat-bubble ol { padding-left: 20px; margin: 6px 0; }
-  .hanzo-chat-bubble li { margin: 3px 0; line-height: 1.5; }
-  .hanzo-chat-bubble h1, .hanzo-chat-bubble h2, .hanzo-chat-bubble h3 { margin: 14px 0 6px; color: #e8e6e1; }
-  .hanzo-chat-bubble h1 { font-size: 16px; font-weight: 600; }
-  .hanzo-chat-bubble h2 { font-size: 14px; font-weight: 600; }
-  .hanzo-chat-bubble h3 { font-size: 13px; font-weight: 600; }
-  .hanzo-chat-bubble p { margin: 5px 0; }
-  .hanzo-chat-bubble pre {
-    margin: 8px 0;
-    padding: 12px 14px;
-    border-radius: 8px;
-    overflow-x: auto;
-    background: #0e0e14 !important;
-    border: 1px solid #2a2a35;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.02);
-  }
-  .hanzo-chat-bubble code { font-size: 12px; font-family: var(--hanzo-font-mono); }
-  .hanzo-chat-bubble code:not(pre code) {
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: #1e1e28;
-    border: 1px solid #2e2e3a;
-    font-size: 11.5px;
-  }
-  .hanzo-chat-bubble table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 12px; border: 1px solid #2a2a35; border-radius: 6px; overflow: hidden; }
-  .hanzo-chat-bubble th, .hanzo-chat-bubble td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #2a2a35; }
-  .hanzo-chat-bubble th { font-weight: 600; color: #e8e6e1; background: #1a1a24; }
-  .hanzo-chat-bubble tr:hover td { background: rgba(255,255,255,0.02); }
-  .hanzo-chat-bubble td { color: #a0a0a8; }
-  .hanzo-chat-bubble blockquote { border-left: 2px solid rgba(255, 255, 255,0.3); padding-left: 12px; margin: 8px 0; color: #a0a0a8; }
-  .hanzo-chat-bubble hr { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 10px 0; }
-
-  /* ── Tool result card ─────────────────────────────────────── */
-  .hanzo-tool-card {
-    background: #16161e !important;
-    border: 1px solid #2a2a35;
-    border-radius: 8px;
-    margin: 2px 0;
-    transition: all 0.15s;
-  }
-  .hanzo-tool-card:hover {
-    background: #1c1c28 !important;
-    border-color: #3a3a48;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-
-  /* ── Streaming cursor ────────────────────────────────────── */
-  .hanzo-stream-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 15px;
-    background: #ffffff;
-    margin-left: 2px;
-    vertical-align: text-bottom;
-    border-radius: 1px;
-    animation: hanzo-blink 0.8s step-end infinite;
-    box-shadow: 0 0 4px rgba(255, 255, 255,0.3);
-  }
-
-  .hanzo-path-link:hover { filter:brightness(1.2) }
-
-  /* ── Whisper row (mid-run inject) ────────────────────────── */
-  .hanzo-whisper-row {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 6px;
-    background: rgba(100, 100, 200, 0.06);
-    border: 1px solid rgba(120, 120, 220, 0.2);
-    border-radius: 8px;
-    margin-top: 4px;
-  }
-  .hanzo-whisper-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--vscode-input-foreground);
-    font-size: 11px;
-    font-family: var(--hanzo-font-ui);
-    opacity: 0.8;
-  }
-  .hanzo-whisper-input::placeholder { opacity: 0.45; font-style: italic; }
-  .hanzo-whisper-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 2px 4px;
-    color: rgba(150, 150, 220, 0.7);
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-  }
-  .hanzo-whisper-btn:hover { color: rgba(180, 180, 255, 1); }
-`
-
 // ─── Panel Registration ──────────────────────────────────────────────────────
 
 export function registerHanzoChat(): void {
@@ -466,22 +229,25 @@ export function registerHanzoChat(): void {
         })
       }
 
-      // Inject chat styles once
-      if (!document.getElementById('hanzo-chat-styles')) {
-        const style = document.createElement('style')
-        style.id = 'hanzo-chat-styles'
-        style.textContent = CHAT_STYLES
-        document.head.appendChild(style)
-      }
-
-      // ── Top Bar (agent, model, session selectors) ──────────────────────
+      // ── Top Bar (conversation + agent controls) ────────────────────────
       const topBar = document.createElement('div')
       topBar.className = 'hanzo-chat-topbar'
-      topBar.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;flex-shrink:0;align-items:center'
+
+      const topBarMain = document.createElement('div')
+      topBarMain.className = 'hanzo-chat-topbar-main'
+      const topBarActions = document.createElement('div')
+      topBarActions.className = 'hanzo-chat-topbar-actions'
+      const topBarContext = document.createElement('div')
+      topBarContext.className = 'hanzo-chat-topbar-context'
+
+      topBar.appendChild(topBarMain)
+      topBar.appendChild(topBarContext)
 
       // Session selector
       const sessionSel = document.createElement('select')
-      sessionSel.style.cssText = 'flex:1;min-width:80px;padding:4px 8px;font-size:11px'
+      sessionSel.className = 'hanzo-chat-session-select'
+      sessionSel.title = 'Conversation history'
+      sessionSel.setAttribute('aria-label', 'Conversation history')
       sessionSel.addEventListener('change', async () => {
         if (S.streaming) await doAbort()
         S.surfaced = false; S.surfacedRound = 0
@@ -498,11 +264,19 @@ export function registerHanzoChat(): void {
         }
       })
       S.sessionSelect = sessionSel
-      topBar.appendChild(sessionSel)
+      topBarMain.appendChild(sessionSel)
+      topBarMain.appendChild(topBarActions)
 
       // Agent selector
+      const agentLabel = document.createElement('span')
+      agentLabel.className = 'hanzo-chat-context-label'
+      agentLabel.innerHTML = '<span class="codicon codicon-sparkle" aria-hidden="true"></span><span>Agent</span>'
+      topBarContext.appendChild(agentLabel)
+
       const agentSel = document.createElement('select')
-      agentSel.style.cssText = 'min-width:80px;padding:4px 8px;font-size:11px'
+      agentSel.className = 'hanzo-chat-agent-select'
+      agentSel.title = 'Choose an agent'
+      agentSel.setAttribute('aria-label', 'Agent')
       agentSel.addEventListener('change', () => {
         const val = agentSel.value
         if (!val) {
@@ -537,11 +311,13 @@ export function registerHanzoChat(): void {
         })
       })
       S.agentSelect = agentSel
-      topBar.appendChild(agentSel)
+      topBarContext.appendChild(agentSel)
 
-      // Model selector
+      // Model selector (rendered in the composer footer)
       const modelSel = document.createElement('select')
-      modelSel.style.cssText = 'min-width:60px;padding:4px 8px;font-size:11px'
+      modelSel.className = 'hanzo-chat-model-select'
+      modelSel.title = 'Language model'
+      modelSel.setAttribute('aria-label', 'Language model')
       modelSel.innerHTML = '<option value="">Auto</option>'
       let modelSaving = false
       modelSel.addEventListener('change', async () => {
@@ -561,12 +337,12 @@ export function registerHanzoChat(): void {
         }
       })
       S.modelSelect = modelSel
-      topBar.appendChild(modelSel)
 
       // New chat button
       const newBtn = document.createElement('button')
+      newBtn.type = 'button'
       newBtn.title = 'New chat'
-      newBtn.style.cssText = 'padding:0'
+      newBtn.setAttribute('aria-label', 'Start a new chat')
       newBtn.innerHTML = '<span class="codicon codicon-add" style="font-size:13px"></span>'
       newBtn.addEventListener('click', async () => {
         // Abort any in-flight run first. Without this the old run kept
@@ -601,15 +377,16 @@ export function registerHanzoChat(): void {
           }
         }
       })
-      topBar.appendChild(newBtn)
+      topBarActions.appendChild(newBtn)
 
       // Providers / Settings button
       const settingsBtn = document.createElement('button')
+      settingsBtn.type = 'button'
       settingsBtn.title = 'Configure providers & models'
-      settingsBtn.style.cssText = 'padding:0'
+      settingsBtn.setAttribute('aria-label', 'Configure providers and models')
       settingsBtn.innerHTML = '<span class="codicon codicon-settings-gear" style="font-size:13px"></span>'
       settingsBtn.addEventListener('click', () => renderProviderSetup())
-      topBar.appendChild(settingsBtn)
+      topBarActions.appendChild(settingsBtn)
 
       // Phase 3 v1: detach chat into its own window. Snapshot the state
       // into localStorage so the new window can hydrate, then ask Rust
@@ -619,8 +396,9 @@ export function registerHanzoChat(): void {
       // listen to engine-event independently and stay in sync via
       // localStorage on the handoff). v2 adds the placeholder.
       const detachBtn = document.createElement('button')
+      detachBtn.type = 'button'
       detachBtn.title = 'Pop chat into its own window'
-      detachBtn.style.cssText = 'padding:0'
+      detachBtn.setAttribute('aria-label', 'Open chat in a separate window')
       detachBtn.innerHTML = '<span class="codicon codicon-multiple-windows" style="font-size:13px"></span>'
       detachBtn.addEventListener('click', async () => {
         try {
@@ -644,7 +422,7 @@ export function registerHanzoChat(): void {
           console.warn('[hanzo-chat] detach failed:', e)
         }
       })
-      topBar.appendChild(detachBtn)
+      topBarActions.appendChild(detachBtn)
 
       /**
        * Replace the message list with a "Chat detached" card and disable
@@ -709,7 +487,7 @@ export function registerHanzoChat(): void {
                 localStorage.removeItem('hanzo:chat:detached-state')
                 renderMessagesFull()
                 if (S.textarea) S.textarea.disabled = false
-                if (S.sendBtn) S.sendBtn.disabled = false
+                if (S.sendBtn) S.sendBtn.disabled = !S.textarea?.value.trim()
               } catch { /* nothing */ }
               // Try to close the window in case it's still hanging.
               void invoke('close_chat_window').catch(() => { /* ignored */ })
@@ -732,14 +510,17 @@ export function registerHanzoChat(): void {
 
       // ── Status + Tool indicator ────────────────────────────────────────
       const statusRow = document.createElement('div')
-      statusRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:2px 8px;font-size:10px;color:var(--vscode-descriptionForeground);flex-shrink:0'
+      statusRow.className = 'hanzo-chat-statusbar'
 
       const headerStatus = document.createElement('span')
+      headerStatus.className = 'hanzo-chat-status'
+      headerStatus.setAttribute('role', 'status')
+      headerStatus.setAttribute('aria-live', 'polite')
       S.headerStatus = headerStatus
       statusRow.appendChild(headerStatus)
 
       const tokenDisp = document.createElement('span')
-      tokenDisp.style.cssText = 'opacity:0.6'
+      tokenDisp.className = 'hanzo-chat-token'
       S.tokenDisplay = tokenDisp
       statusRow.appendChild(tokenDisp)
 
@@ -762,8 +543,14 @@ export function registerHanzoChat(): void {
       initProgressListener().catch(console.warn)
 
       // ── Message list ───────────────────────────────────────────────────
+      const messageStage = document.createElement('div')
+      messageStage.className = 'hanzo-chat-message-stage'
+
       const msgList = document.createElement('div')
-      msgList.style.cssText = 'flex:1;min-height:0;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:2px'
+      msgList.className = 'hanzo-chat-messages'
+      msgList.setAttribute('role', 'log')
+      msgList.setAttribute('aria-label', 'Chat conversation')
+      msgList.setAttribute('aria-live', 'polite')
       msgList.addEventListener('click', (e) => {
         const target = (e.target as HTMLElement).closest('[data-fspath]') as HTMLElement | null
         if (target?.dataset.fspath) openPathInEditor(target.dataset.fspath)
@@ -772,30 +559,57 @@ export function registerHanzoChat(): void {
         e.stopPropagation()
         msgList.scrollTop += e.deltaY
       }, { passive: false })
-      S.msgList = msgList
-      container.appendChild(msgList)
 
-      // ── Context pills bar ──────────────────────────────────────────────
+      const scrollLatestBtn = document.createElement('button')
+      scrollLatestBtn.type = 'button'
+      scrollLatestBtn.className = 'hanzo-chat-scroll-latest'
+      scrollLatestBtn.title = 'Jump to latest message'
+      scrollLatestBtn.setAttribute('aria-label', 'Jump to latest message')
+      scrollLatestBtn.setAttribute('data-visible', 'false')
+      scrollLatestBtn.innerHTML = '<span class="codicon codicon-chevron-down" aria-hidden="true"></span>'
+      const updateScrollLatest = () => {
+        const distance = msgList.scrollHeight - msgList.scrollTop - msgList.clientHeight
+        scrollLatestBtn.setAttribute('data-visible', String(distance > 120))
+      }
+      msgList.addEventListener('scroll', updateScrollLatest, { passive: true })
+      scrollLatestBtn.addEventListener('click', () => {
+        msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' })
+      })
+      const messageObserver = new MutationObserver(updateScrollLatest)
+      messageObserver.observe(msgList, { childList: true, subtree: true })
+
+      S.msgList = msgList
+      messageStage.appendChild(msgList)
+      messageStage.appendChild(scrollLatestBtn)
+      container.appendChild(messageStage)
+
+      // ── Context pills bar (rendered inside the composer) ───────────────
       const contextBar = document.createElement('div')
-      contextBar.style.cssText = 'display:none;flex-wrap:wrap;gap:4px;padding:4px 8px 2px;flex-shrink:0'
+      contextBar.className = 'hanzo-chat-context-bar'
       S.contextBar = contextBar
-      container.appendChild(contextBar)
 
       // ── Input area ─────────────────────────────────────────────────────
       const inputArea = document.createElement('div')
       inputArea.className = 'hanzo-chat-input-area'
-      inputArea.style.cssText = 'padding:10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0'
 
-      // Options row (thinking level, auto-approve toggle)
+      // Composer footer (context controls, modes, model, and send actions)
       const optionsRow = document.createElement('div')
-      optionsRow.style.cssText = 'display:flex;gap:6px;align-items:center;font-size:10px;color:var(--vscode-descriptionForeground)'
+      optionsRow.className = 'hanzo-chat-options-row'
+      const optionsLeft = document.createElement('div')
+      optionsLeft.className = 'hanzo-chat-options-left'
+      const optionsRight = document.createElement('div')
+      optionsRight.className = 'hanzo-chat-options-right'
+      optionsRow.appendChild(optionsLeft)
+      optionsRow.appendChild(optionsRight)
 
-      const thinkingLabel = document.createElement('span')
-      thinkingLabel.textContent = 'Thinking:'
-      optionsRow.appendChild(thinkingLabel)
+      const thinkingControl = document.createElement('label')
+      thinkingControl.className = 'hanzo-chat-thinking-control'
+      thinkingControl.title = 'Reasoning effort'
+      thinkingControl.innerHTML = '<span class="codicon codicon-lightbulb" aria-hidden="true"></span>'
 
       const thinkingSel = document.createElement('select')
-      thinkingSel.style.cssText = 'background:var(--vscode-input-background);color:var(--vscode-input-foreground);border:1px solid var(--vscode-input-border,#333);border-radius:3px;padding:1px 3px;font-size:10px'
+      thinkingSel.className = 'hanzo-chat-thinking-select'
+      thinkingSel.setAttribute('aria-label', 'Reasoning effort')
       thinkingSel.innerHTML = '<option value="none">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>'
       // 2B: restore the persisted level from prefs (S.thinkingLevel was
       // hydrated above) instead of always defaulting to "none".
@@ -804,18 +618,18 @@ export function registerHanzoChat(): void {
         S.thinkingLevel = thinkingSel.value
         persistPrefs()
       })
-      optionsRow.appendChild(thinkingSel)
+      thinkingControl.appendChild(thinkingSel)
+      optionsLeft.appendChild(thinkingControl)
 
       // Plan mode toggle
       const planBtn = document.createElement('button')
+      planBtn.type = 'button'
+      planBtn.className = 'hanzo-chat-plan-button'
       planBtn.title = 'Plan mode: agent writes a plan for approval before executing'
-      planBtn.style.cssText = 'display:flex;align-items:center;gap:3px;background:transparent;border:1px solid var(--vscode-widget-border,#444);border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;color:var(--vscode-descriptionForeground);transition:all 0.15s'
-      planBtn.innerHTML = '<span class="codicon codicon-list-tree" style="font-size:11px"></span> Plan'
+      planBtn.innerHTML = '<span class="codicon codicon-list-tree" aria-hidden="true"></span> Plan'
       function updatePlanBtn() {
-        planBtn.style.background = S.planMode ? 'var(--vscode-button-background)' : 'transparent'
-        planBtn.style.color = S.planMode ? 'var(--vscode-button-foreground)' : 'var(--vscode-descriptionForeground)'
-        planBtn.style.borderColor = S.planMode ? 'var(--vscode-button-background)' : 'var(--vscode-widget-border,#444)'
-        if (S.textarea) S.textarea.placeholder = S.planMode ? 'Describe what you want built… (agent will plan first)' : 'Ask Hanzo anything… (Cmd+L)'
+        planBtn.setAttribute('aria-pressed', String(S.planMode))
+        if (S.textarea) S.textarea.placeholder = S.planMode ? 'Describe what you want built… (agent will plan first)' : 'Ask Hanzo anything…'
       }
       planBtn.addEventListener('click', () => {
         S.planMode = !S.planMode
@@ -823,11 +637,13 @@ export function registerHanzoChat(): void {
         persistPrefs()
       })
       updatePlanBtn()
-      optionsRow.appendChild(planBtn)
+      optionsLeft.appendChild(planBtn)
 
       // Approval mode selector
       const approvalWrap = document.createElement('div')
-      approvalWrap.style.cssText = 'display:flex;align-items:center;gap:2px;margin-left:auto;background:var(--vscode-input-background);border:1px solid var(--vscode-input-border,#333);border-radius:4px;overflow:hidden'
+      approvalWrap.className = 'hanzo-chat-approval'
+      approvalWrap.setAttribute('role', 'group')
+      approvalWrap.setAttribute('aria-label', 'Tool approval mode')
       const approvalModes: { mode: ApprovalMode; label: string; title: string }[] = [
         { mode: 'ask',  label: 'Ask',  title: 'Ask before every write, run, edit, or external action. Read-only tools (file reads, AST queries, git status) still run without asking.' },
         { mode: 'auto', label: 'Auto', title: 'Run without asking, including shell commands, file deletes, and external API calls.' },
@@ -837,9 +653,7 @@ export function registerHanzoChat(): void {
         S.approvalMode = m
         approvalBtns.forEach((b, i) => {
           const active = approvalModes[i].mode === m
-          b.style.background = active ? 'var(--vscode-button-background)' : 'transparent'
-          b.style.color = active ? 'var(--vscode-button-foreground)' : 'var(--vscode-descriptionForeground)'
-          b.style.fontWeight = active ? '600' : '400'
+          b.setAttribute('aria-pressed', String(active))
         })
         // 2B: persist user's approval-mode pick across restarts. The
         // `persist` arg lets the post-build initialisation call this to
@@ -856,9 +670,9 @@ export function registerHanzoChat(): void {
       }
       for (const { mode, label, title } of approvalModes) {
         const btn = document.createElement('button')
+        btn.type = 'button'
         btn.textContent = label
         btn.title = title
-        btn.style.cssText = 'border:none;cursor:pointer;padding:1px 6px;font-size:10px;transition:all 0.1s'
         btn.addEventListener('click', () => setApprovalMode(mode))
         approvalBtns.push(btn)
         approvalWrap.appendChild(btn)
@@ -867,19 +681,16 @@ export function registerHanzoChat(): void {
       // because the value came FROM localStorage; saving here would be a
       // redundant write on every renderBody.
       setApprovalMode(S.approvalMode, false)
-      optionsRow.appendChild(approvalWrap)
-
-      inputArea.appendChild(optionsRow)
 
       // Text input row
       const inputRow = document.createElement('div')
       inputRow.className = 'hanzo-chat-input-row'
-      inputRow.style.cssText = 'display:flex;align-items:flex-end;gap:6px;padding:8px 10px'
 
       const textarea = document.createElement('textarea')
       textarea.rows = 1
-      textarea.placeholder = 'Ask Hanzo anything… (Cmd+L)'
-      textarea.style.cssText = 'flex:1;background:transparent;border:none;outline:none;resize:none;color:var(--vscode-input-foreground);font-size:13px;font-family:var(--hanzo-font-ui);line-height:1.4;min-height:20px;max-height:120px;overflow-y:auto;padding:0'
+      textarea.className = 'hanzo-chat-textarea'
+      textarea.placeholder = 'Ask Hanzo anything…'
+      textarea.setAttribute('aria-label', 'Message Hanzo')
       let _heightTimer: ReturnType<typeof setTimeout> | null = null
       textarea.addEventListener('input', () => {
         if (_heightTimer) return
@@ -887,7 +698,7 @@ export function registerHanzoChat(): void {
           _heightTimer = null
           // Measure scrollHeight without collapsing to 'auto' first —
           // collapsing causes a layout reflow that can trigger VS Code's focus manager.
-          const target = Math.min(textarea.scrollHeight, 120)
+          const target = Math.min(textarea.scrollHeight, 160)
           if (Math.abs(textarea.offsetHeight - target) > 2) {
             textarea.style.height = target + 'px'
           }
@@ -922,24 +733,33 @@ export function registerHanzoChat(): void {
       S.textarea = textarea
 
       const sendBtn = document.createElement('button')
+      sendBtn.type = 'button'
       sendBtn.title = 'Send (Enter)'
       sendBtn.className = 'hanzo-chat-send'
-      sendBtn.style.cssText = 'display:flex;align-items:center;justify-content:center;color:#000;width:28px;height:28px;cursor:pointer;flex-shrink:0'
-      sendBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>'
+      sendBtn.setAttribute('aria-label', 'Send message')
+      sendBtn.disabled = true
+      sendBtn.innerHTML = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m6 11 6-6 6 6"></path></svg>'
       sendBtn.addEventListener('click', doSend)
+      const updateSendState = () => { sendBtn.disabled = textarea.value.trim().length === 0 }
+      textarea.addEventListener('input', updateSendState)
       S.sendBtn = sendBtn
 
       const stopBtn = document.createElement('button')
+      stopBtn.type = 'button'
       stopBtn.title = 'Stop generation'
-      stopBtn.style.cssText = 'display:none;align-items:center;justify-content:center;background:#da3633;color:white;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;flex-shrink:0'
-      stopBtn.innerHTML = '<span class="codicon codicon-debug-stop" style="font-size:14px"></span>'
+      stopBtn.className = 'hanzo-chat-stop'
+      stopBtn.setAttribute('aria-label', 'Stop generation')
+      stopBtn.style.display = 'none'
+      stopBtn.innerHTML = '<span class="codicon codicon-debug-stop" aria-hidden="true"></span>'
       stopBtn.addEventListener('click', doAbort)
       S.stopBtn = stopBtn
 
       const surfaceBtn = document.createElement('button')
+      surfaceBtn.type = 'button'
       surfaceBtn.title = 'Pause agent and surface findings for discussion'
-      surfaceBtn.style.cssText = 'display:none;align-items:center;justify-content:center;gap:4px;background:rgba(255, 255, 255,0.12);color:#ffffff;border:1px solid rgba(255, 255, 255,0.3);border-radius:4px;padding:0 8px;height:26px;font-size:11px;cursor:pointer;flex-shrink:0'
-      surfaceBtn.innerHTML = '<span class="codicon codicon-comment-discussion" style="font-size:12px"></span><span>Surface</span>'
+      surfaceBtn.className = 'hanzo-chat-run-button'
+      surfaceBtn.style.display = 'none'
+      surfaceBtn.innerHTML = '<span class="codicon codicon-comment-discussion" aria-hidden="true"></span><span>Surface</span>'
       surfaceBtn.addEventListener('click', () => {
         if (S.sessionId) {
           invoke('engine_chat_surface', { sessionId: S.sessionId }).catch(console.warn)
@@ -949,9 +769,11 @@ export function registerHanzoChat(): void {
       S.surfaceBtn = surfaceBtn
 
       const resumeBtn = document.createElement('button')
+      resumeBtn.type = 'button'
       resumeBtn.title = 'Resume audit from where it was paused'
-      resumeBtn.style.cssText = 'display:none;align-items:center;justify-content:center;gap:5px;background:rgba(255, 255, 255,0.12);color:#ffffff;border:1px solid rgba(255, 255, 255,0.3);border-radius:4px;padding:0 10px;height:26px;font-size:11px;cursor:pointer;flex-shrink:0;font-weight:600'
-      resumeBtn.innerHTML = '<span class="codicon codicon-debug-continue" style="font-size:12px"></span><span>Resume audit</span>'
+      resumeBtn.className = 'hanzo-chat-run-button'
+      resumeBtn.style.display = 'none'
+      resumeBtn.innerHTML = '<span class="codicon codicon-debug-continue" aria-hidden="true"></span><span>Resume</span>'
       resumeBtn.addEventListener('click', doResume)
       S.resumeBtn = resumeBtn
 
@@ -985,8 +807,10 @@ export function registerHanzoChat(): void {
 
       // @ mention button
       const mentionBtn = document.createElement('button')
-      mentionBtn.title = 'Mention file (@)'
-      mentionBtn.style.cssText = 'background:transparent;border:none;cursor:pointer;padding:3px 5px;color:var(--vscode-descriptionForeground);display:flex;align-items:center;opacity:0.7;flex-shrink:0;font-size:13px;font-weight:600;font-family:var(--hanzo-font-mono)'
+      mentionBtn.type = 'button'
+      mentionBtn.title = 'Add file, Git changes, or chat participant (@)'
+      mentionBtn.className = 'hanzo-chat-composer-tool'
+      mentionBtn.setAttribute('aria-label', 'Add context with an at mention')
       mentionBtn.textContent = '@'
       mentionBtn.addEventListener('click', () => pickAndAttach(true))
 
@@ -1162,9 +986,11 @@ export function registerHanzoChat(): void {
 
       // Attach file button (paperclip)
       const attachBtn = document.createElement('button')
+      attachBtn.type = 'button'
       attachBtn.title = 'Attach file'
-      attachBtn.style.cssText = 'background:transparent;border:none;cursor:pointer;padding:3px;color:var(--vscode-descriptionForeground);display:flex;opacity:0.7;flex-shrink:0'
-      attachBtn.innerHTML = '<span class="codicon codicon-paperclip" style="font-size:14px"></span>'
+      attachBtn.className = 'hanzo-chat-composer-tool'
+      attachBtn.setAttribute('aria-label', 'Attach file')
+      attachBtn.innerHTML = '<span class="codicon codicon-paperclip" aria-hidden="true"></span>'
       attachBtn.addEventListener('click', () => pickAndAttach(false))
 
       // Image paste support
@@ -1187,20 +1013,28 @@ export function registerHanzoChat(): void {
         }
       })
 
-      inputRow.appendChild(mentionBtn)
-      inputRow.appendChild(attachBtn)
       inputRow.appendChild(textarea)
-      inputRow.appendChild(sendBtn)
-      inputRow.appendChild(stopBtn)
-      inputRow.appendChild(surfaceBtn)
-      inputRow.appendChild(resumeBtn)
+      optionsLeft.prepend(attachBtn)
+      optionsLeft.prepend(mentionBtn)
+      optionsRight.appendChild(approvalWrap)
+      optionsRight.appendChild(modelSel)
+      optionsRight.appendChild(surfaceBtn)
+      optionsRight.appendChild(resumeBtn)
+      optionsRight.appendChild(stopBtn)
+      optionsRight.appendChild(sendBtn)
 
-      // Attachment bar (shown above input row when files attached)
+      // Attachment bar (shown above input row when files are attached)
       const attachBar = document.createElement('div')
-      attachBar.style.cssText = 'display:none;flex-wrap:wrap;gap:4px;padding:4px 0'
+      attachBar.className = 'hanzo-chat-attachment-bar'
       S.attachmentBar = attachBar
-      inputArea.appendChild(attachBar)
-      inputArea.appendChild(inputRow)
+
+      const composer = document.createElement('div')
+      composer.className = 'hanzo-chat-composer'
+      composer.appendChild(contextBar)
+      composer.appendChild(attachBar)
+      composer.appendChild(inputRow)
+      composer.appendChild(optionsRow)
+      inputArea.appendChild(composer)
 
       // ── Whisper row (visible only while streaming) ──────────────────────
       const whisperRow = document.createElement('div')
@@ -1308,9 +1142,9 @@ export function registerHanzoChat(): void {
           // reattach and the user can't type.
           if (S.textarea) {
             S.textarea.disabled = false
-            S.textarea.placeholder = 'Ask Hanzo anything… (Cmd+L)'
+            S.textarea.placeholder = 'Ask Hanzo anything…'
           }
-          if (S.sendBtn) S.sendBtn.disabled = false
+          if (S.sendBtn) S.sendBtn.disabled = !S.textarea?.value.trim()
         } catch (e) {
           console.warn('[hanzo-chat] chat-reattach hydration failed:', e)
         }
@@ -1322,6 +1156,7 @@ export function registerHanzoChat(): void {
 
       return {
         dispose() {
+          messageObserver.disconnect()
           S.msgList = null; S.textarea = null; S.sendBtn = null; S.stopBtn = null
           S.toolRow = null; S.streamingBubble = null; S.headerStatus = null; S.progressLog = null
           if (S.progressUnlisten) { S.progressUnlisten(); S.progressUnlisten = null }

@@ -25,7 +25,8 @@
 //     would let an extension provide its own JS adapter; deferred.
 
 import { invoke } from '@tauri-apps/api/core'
-import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+import { type UnlistenFn } from '@tauri-apps/api/event'
+import { listen } from './tauri.ts'
 import { getWorkspace } from './ide-context.ts'
 import { notifyDebugActivation } from './extension-bridge.ts'
 

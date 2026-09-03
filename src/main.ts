@@ -1,8 +1,12 @@
 import './global.css'
 import { initializeWorkbench, initializeDeferredFeatures } from './workbench.ts'
+import { tauri } from './hanzo/tauri.ts'
+import { finish } from './hanzo/iam.ts'
 
 async function boot() {
   try {
+    // A sign-in returning to this page is finished before anything reads it.
+    if (!tauri()) await finish().catch((e) => console.warn('[hanzo] sign-in did not finish:', e))
     // Phase 1: Core workbench — must complete before showing UI
     await initializeWorkbench()
 

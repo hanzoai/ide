@@ -92,7 +92,7 @@ async function emitOpenWorkspaceOnce(path: string): Promise<void> {
     return
   }
   trackPath(_openWorkspaceEmitted, path)
-  const { emit } = await import('@tauri-apps/api/event')
+  const { emit } = await import('./tauri.ts')
   await emit('open-workspace', { path })
   console.log('[hanzo-workspace] emitted open-workspace for:', path)
 }
@@ -293,7 +293,7 @@ async function _pickAndOpenFolderInner(): Promise<boolean> {
  * Called after the workbench boots.
  */
 export async function listenForWorkspaceOpen(): Promise<void> {
-  const { listen } = await import('@tauri-apps/api/event')
+  const { listen } = await import('./tauri.ts')
   await listen<{ path: string }>('open-workspace', async (event) => {
     const path = event.payload.path
     if (!path) return
@@ -474,7 +474,7 @@ export async function initWorkspaceServices(): Promise<void> {
       // trigger_reindex may not exist on older builds — fall back to event.
       // Both paths failing means the workspace opens but indexing never
       // starts; log so the silent state is debuggable.
-      import('@tauri-apps/api/event').then(({ emit }) => {
+      import('./tauri.ts').then(({ emit }) => {
         emit('open-workspace', { path: workspace })
       }).catch((emitErr) => {
         console.warn(

@@ -10,7 +10,8 @@
 // is confirmed working live.
 
 import { invoke } from '@tauri-apps/api/core'
-import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+import { type UnlistenFn } from '@tauri-apps/api/event'
+import { listen } from './tauri.ts'
 import { getWorkspace } from './ide-context.ts'
 
 const CMDK_SESSION = '__hanzo_terminal_cmdk__'

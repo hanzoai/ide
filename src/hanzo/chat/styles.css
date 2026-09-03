@@ -719,7 +719,7 @@
 .hanzo-chat-run-button,
 .hanzo-chat-stop,
 .hanzo-chat-send {
-  display: inline-flex !important;
+  display: inline-flex;
   height: 26px !important;
   align-items: center !important;
   justify-content: center !important;
@@ -966,6 +966,8 @@
   .hanzo-chat-plan-button .codicon { font-size: 11px; }
   .hanzo-chat-approval button { padding-inline: 4px !important; font-size: 9px !important; }
   .hanzo-chat-model-select { width: 68px; }
+  .hanzo-chat-run-button { width: 26px; overflow: hidden; padding: 0 !important; font-size: 0; }
+  .hanzo-chat-run-button .codicon { font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

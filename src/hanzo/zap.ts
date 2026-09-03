@@ -4,7 +4,7 @@
 // editor here as an event, because only the window can show a file to the
 // person sitting in front of it.
 
-import { listen } from '@tauri-apps/api/event'
+import { listen } from './tauri.ts'
 
 export async function registerZap(): Promise<void> {
   await listen<string>('zap-open', async (event) => {

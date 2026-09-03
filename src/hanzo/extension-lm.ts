@@ -23,7 +23,7 @@
 //   - vendor: 'hanzo' models that route to local cache / engram
 
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
+import { listen } from './tauri.ts'
 
 interface ModelEntry {
   id: string

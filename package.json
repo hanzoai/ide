@@ -83,6 +83,7 @@
     "@codingame/monaco-vscode-working-copy-service-override": "^28.0.1",
     "@codingame/monaco-vscode-workspace-trust-service-override": "^28.0.1",
     "@hanzo/font": "^1.9.3",
+    "@hanzo/iam": "^0.21.18",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/cli": "^2.10.1",
     "@tauri-apps/plugin-dialog": "^2.6.0",

@@ -6,7 +6,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
+import { listen } from '../tauri.ts'
 import { S } from './state.ts'
 import type { ChatMsg, EngineEvent } from './types.ts'
 import {
@@ -311,7 +311,7 @@ function addApprovalButtons(toolCallId: string, toolName: string, tier: string):
 
   const label = document.createElement('span')
   label.style.cssText = 'flex:1;font-size:12px;color:var(--vscode-foreground);line-height:1.4'
-  label.innerHTML = `<strong style="color:#ffffff">Approval needed</strong> <code style="font-family:Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:11px;opacity:0.85">${toolName}</code> <span style="opacity:0.55;font-size:10px">(${tier})</span>`
+  label.innerHTML = `<strong style="color:#ffffff">Approval needed</strong> <code style="font-family:var(--hanzo-font-mono);font-size:11px;opacity:0.85">${toolName}</code> <span style="opacity:0.55;font-size:10px">(${tier})</span>`
   row.appendChild(label)
 
   const approveBtn = document.createElement('button')
@@ -412,7 +412,7 @@ function handleToolResult(ev: Extract<EngineEvent, { kind: 'tool_result' }>): vo
 
 export async function initProgressListener(): Promise<void> {
   if (S.progressUnlisten) return
-  const { listen: listenEvent } = await import('@tauri-apps/api/event')
+  const { listen: listenEvent } = await import('../tauri.ts')
 
   const unlisten = await listenEvent<{ message: string; timestamp: number }>('sandbox-progress', ({ payload }) => {
     // sandbox-progress carries no run_id so we guard with S.runId — if no run

@@ -5,6 +5,8 @@
  */
 
 import { invoke } from '@tauri-apps/api/core'
+import { tauri } from '../tauri.ts'
+import { token } from '../iam.ts'
 import { S } from './state.ts'
 import type { ChatResponse, AgentCheckpoint } from './types.ts'
 import {
@@ -164,8 +166,7 @@ export async function doSend(): Promise<void> {
 
   try {
     let response: ChatResponse | null = null
-    const isTauri = Boolean((window as any).__TAURI_INTERNALS__?.invoke)
-    if (isTauri) {
+    if (tauri()) {
       try {
         response = await invoke<ChatResponse>('engine_chat_send', {
           request: {
@@ -188,13 +189,14 @@ export async function doSend(): Promise<void> {
     }
 
     if (!response) {
-      // Cloud agentic streaming via api.hanzo.ai
-      const token = localStorage.getItem('hanzo:token') || localStorage.getItem('hanzo_token') || ''
-      const cloudRes = await fetch('https://api.hanzo.ai/v1/chat/completions', {
+      // Cloud streaming. VITE_HANZO_API_URL points this at a cloud binary on
+      // the LAN; unset, it is the platform.
+      const bearer = await token()
+      const cloudRes = await fetch(`${import.meta.env.VITE_HANZO_API_URL ?? 'https://api.hanzo.ai'}/v1/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
         },
         body: JSON.stringify({
           model: S.selectedModel || 'enso-auto',
@@ -215,6 +217,7 @@ export async function doSend(): Promise<void> {
         const reader = cloudRes.body.getReader()
         const decoder = new TextDecoder()
         let accumulated = ''
+        let runId: string | undefined
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
@@ -224,6 +227,7 @@ export async function doSend(): Promise<void> {
             if (line.startsWith('data: ') && line !== 'data: [DONE]') {
               try {
                 const parsed = JSON.parse(line.slice(6))
+                runId ??= parsed.id
                 const delta = parsed.choices?.[0]?.delta?.content || ''
                 if (delta) {
                   accumulated += delta
@@ -238,7 +242,7 @@ export async function doSend(): Promise<void> {
         }
         response = {
           session_id: sessionId,
-          run_id: `run-${Date.now()}`,
+          run_id: runId ?? sessionId,
           message: accumulated,
           finish_reason: 'stop',
         } as any

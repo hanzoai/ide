@@ -7,9 +7,16 @@
  *   3. Hanzo component overrides (watermark, activity bar, sidebar, etc.)
  */
 
-/* Zen is the Hanzo typeface. Bundled with the app, so it needs no network
-   and renders the same offline. */
-@import '@hanzo/font/css';
+/* The sign-in control lives in the titlebar, under VS Code's
+   `.titlebar-drag-region`, which is position:absolute and pointer-events:auto.
+   A static sibling paints beneath it, so every click on "Sign In" landed on the
+   drag div — measured in a plain browser, where it made the button unclickable.
+   Stacked above it, and told the window it is not a drag handle. */
+.hanzo-account {
+  position: relative;
+  z-index: 1;
+  -webkit-app-region: no-drag;
+}
 
 /* ─── 1. Reset & shell ───────────────────────────────────────────────────── */
 

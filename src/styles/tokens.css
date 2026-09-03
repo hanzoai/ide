@@ -1,3 +1,8 @@
+/* Zen is the Hanzo typeface, and this is the ONE place it is loaded: every
+   entry imports this sheet, so the workbench and the detached chat wear the
+   same face. Bundled with the app — no network, the same offline. */
+@import '@hanzo/font/css';
+
 /* ── Hanzo Design Tokens ──────────────────────────────────────────────────────
  * The single source of truth for Hanzo's visual language.
  * ────────────────────────────────────────────────────────────────────────── */

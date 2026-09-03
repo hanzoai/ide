@@ -19,7 +19,7 @@ export const PROVIDER_DEFS = [
   { id: 'deepseek',   label: 'DeepSeek',   placeholder: 'sk-...',     url: 'https://api.deepseek.com',                              models: ['deepseek-chat', 'deepseek-reasoner'] },
   { id: 'xai',        label: 'xAI (Grok)', placeholder: 'xai-...',    url: 'https://api.x.ai/v1',                                   models: ['grok-3', 'grok-3-mini', 'grok-2'] },
   { id: 'mistral',    label: 'Mistral',    placeholder: 'sk-...',     url: 'https://api.mistral.ai/v1',                             models: ['mistral-large-latest', 'mistral-small-latest', 'codestral-latest'] },
-  { id: 'ollama',     label: 'Ollama',     placeholder: '(no key)',   url: 'http://localhost:11434',                                models: ['llama3.2', 'llama3.1:70b', 'qwen2.5-coder', 'deepseek-coder-v2'] },
+  { id: 'ollama',     label: 'Ollama',     placeholder: '(no key)',   url: 'http://localhost:11434',                                models: ['llama3.2', 'llama3.1:70b', 'qwen3-coder', 'deepseek-coder-v2'] },
   { id: 'claudecode', label: 'Claude Code', placeholder: '(no key)',  url: '',                                                      models: ['sonnet', 'opus', 'haiku'] },
   { id: 'custom',     label: 'Custom',     placeholder: 'sk-...',     url: '',                                                      models: [] },
 ]

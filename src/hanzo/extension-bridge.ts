@@ -13,7 +13,8 @@
 //   - Receiving commands/diagnostics FROM the sidecar
 
 import { invoke } from '@tauri-apps/api/core'
-import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+import { type UnlistenFn } from '@tauri-apps/api/event'
+import { listen } from './tauri.ts'
 
 // ─── Debug logging ──────────────────────────────────────────────────────────
 //

@@ -7,7 +7,7 @@
 //   → This module receives it → queries Monaco → calls ide_tool_response
 
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
+import { listen } from './tauri.ts'
 
 interface ToolRequest {
   request_id: string
@@ -138,7 +138,7 @@ export async function initToolBridge(): Promise<void> {
       // Display-only: emit as terminal-data (renders in xterm.js) NOT terminal_write
       // (which would pipe text into the shell's stdin as if the user typed it)
       try {
-        const { emit } = await import('@tauri-apps/api/event')
+        const { emit } = await import('./tauri.ts')
         await emit('terminal-data', { terminal_id: _activeTerminalId, data: output })
       } catch (e) {
         console.warn('[hanzo-tool-bridge] agent-command-echo display failed:', e)
@@ -670,7 +670,7 @@ async function runCommandInTerminal(command: string, _cwd?: string): Promise<any
   let done = false
 
   // Listen to terminal-data events for this terminal
-  const { listen } = await import('@tauri-apps/api/event')
+  const { listen } = await import('./tauri.ts')
   const unlisten = await listen<{ terminal_id: string; data: string }>('terminal-data', (event) => {
     if (event.payload.terminal_id !== terminalId) return
     const chunk = event.payload.data
