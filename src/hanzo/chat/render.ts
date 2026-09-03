@@ -323,7 +323,7 @@ export function makeBubble(msg: ChatMsg): HTMLElement {
 
   } else {
     // Assistant
-    wrap.style.cssText = 'display:flex;justify-content:flex-start;padding:4px 0 2px'
+    wrap.style.cssText = 'display:flex;justify-content:flex-start;padding:4px 14px 2px'
     bubble.className = 'hanzo-chat-bubble'
     bubble.style.cssText = 'max-width:100%;font-size:13px;line-height:1.65;color:#d4d2cc;word-break:break-word'
     bubble.innerHTML = linkifyPaths(renderMd(msg.content))
@@ -364,10 +364,13 @@ export function renderMessages(): void {
     _renderedCount = 0
     S.msgList.innerHTML = ''
     const empty = document.createElement('div')
-    empty.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;text-align:center;padding:32px'
+    empty.className = 'hanzo-chat-empty'
     empty.innerHTML = `
-      <img src="${window.location.origin}/wordmark.svg" style="width:200px;height:auto" alt="Hanzo">
-      <span style="font-size:11px;color:var(--vscode-descriptionForeground);opacity:0.4;letter-spacing:0.04em">Your codebase, understood.</span>
+      <div class="hanzo-chat-empty-heading">
+        <span class="hanzo-chat-empty-mark"><img src="${window.location.origin}/mark.svg" alt=""></span>
+        <span class="hanzo-chat-empty-title">Hanzo</span>
+      </div>
+      <div class="hanzo-chat-empty-subtitle">Your codebase, understood.</div>
     `
     S.msgList.appendChild(empty)
     return
@@ -381,8 +384,7 @@ export function renderMessages(): void {
 
   // Remove empty state placeholder if present
   if (_renderedCount === 0) {
-    const empty = S.msgList.querySelector('div[style*="justify-content:center"]')
-    if (empty) empty.remove()
+    S.msgList.querySelector('.hanzo-chat-empty')?.remove()
   }
 
   // Incremental append: only add new messages — no DOM teardown, no focus loss

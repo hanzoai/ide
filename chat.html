@@ -18,7 +18,6 @@
         height: 100%;
         width: 100%;
         overflow: hidden;
-        font-family: var(--hanzo-font-ui);
         background: #1e1e1e;
         color: #d4d2cc;
       }
@@ -44,27 +43,11 @@
         --vscode-textLink-foreground: #4daafc;
       }
 
-      /* Codicon font is loaded by the workbench in the main window. The
-       * detached chat does not load it; fall back to a unicode middot for
-       * the few inline `codicon` references in the chat panel so the UI
-       * does not show empty boxes. Real codicon font would be a v2
-       * polish task. */
-      .codicon::before {
-        content: '\\00B7';
-        font-family: var(--hanzo-font-mono, monospace);
-      }
 
-      #hanzo-chat-detached-root {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden;
-      }
     </style>
   </head>
   <body>
-    <div id="hanzo-chat-detached-root"></div>
+    <div id="hanzo-chat-detached-root" class="hanzo-chat-container"></div>
     <script type="module" src="/src/chat-main.ts"></script>
   </body>
 </html>

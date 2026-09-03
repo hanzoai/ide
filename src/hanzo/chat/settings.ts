@@ -5,6 +5,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core'
+import { tauri } from '../tauri.ts'
 import { S } from './state.ts'
 import { renderMessagesFull } from './render.ts'
 
@@ -44,6 +45,7 @@ function lbl(text: string): HTMLElement {
 // ─── Provider Check ──────────────────────────────────────────────────────────
 
 export async function checkProviders(): Promise<void> {
+  if (!tauri()) { S.needsProviderSetup = false; return }
   try {
     const config = await invoke<any>('engine_get_config')
     S.needsProviderSetup = !config?.providers?.length

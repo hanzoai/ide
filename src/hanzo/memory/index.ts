@@ -11,6 +11,7 @@
 // we render a one-line pointer instead of trying to take over configuration.
 
 import { invoke } from '@tauri-apps/api/core';
+import { tauri } from '../tauri.ts';
 import {
   registerEditorPane,
   SimpleEditorPane,
@@ -389,6 +390,7 @@ function getInput(): MemoryPalaceInput {
  * have something useful to show.
  */
 async function isMemoryBackendReachable(): Promise<boolean> {
+  if (!tauri()) return false;
   try {
     await invoke('engine_memory_stats');
     return true;

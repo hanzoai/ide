@@ -17,6 +17,7 @@
   z-index: 1;
   -webkit-app-region: no-drag;
 }
+.hanzo-account-btn { white-space: nowrap; }
 
 /* ─── 1. Reset & shell ───────────────────────────────────────────────────── */
 

@@ -246,6 +246,8 @@ export async function doSend(): Promise<void> {
           message: accumulated,
           finish_reason: 'stop',
         } as any
+        S.msgList?.querySelector('#hanzo-streaming')?.remove()
+        S.streamingBubble = null
         S.messages.push({ role: 'assistant', content: accumulated, ts: new Date() })
         setStreaming(false)
         renderMessages()

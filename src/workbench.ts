@@ -135,7 +135,7 @@ import { TauriFileSystemProvider } from './tauri-fs-provider.ts'
 import { HanzoTerminalBackend } from './hanzo/terminal-backend.ts'
 import { createWorkspaceProvider } from './hanzo/workspace.ts'
 import { registerHanzoSettingsPane } from './hanzo/provider-settings.ts'
-import { registerHanzoChat } from './hanzo/chat/index.ts'
+import { registerHanzoChat } from './hanzo/chat/view.ts'
 import { registerInlineEdit } from './hanzo/inline.ts'
 import { registerGhostCompletions } from './hanzo/completions.ts'
 import { registerHanzoExtensions } from './hanzo/extensions.ts'
@@ -318,6 +318,8 @@ export async function initializeWorkbench(): Promise<void> {
       },
 
       workspaceProvider: createWorkspaceProvider(),
+
+      defaultLayout: { views: [{ id: 'hanzo.chat' }] },
 
       configurationDefaults: {
         'workbench.colorTheme': 'Default Dark Modern',
@@ -535,7 +537,7 @@ export async function initializeDeferredFeatures(): Promise<void> {
     // the handler, unlike beforeunload which doesn't reliably wait for promises.
     // The beforeunload below is kept as a best-effort fallback for the page-reload
     // case (folder open triggers a reload, not a window close).
-    try {
+    if (tauri()) try {
       const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
       const win = getCurrentWebviewWindow()
       await win.onCloseRequested(async () => {

@@ -270,7 +270,6 @@
   background: var(--hanzo-chat-control) !important;
   color: var(--hanzo-chat-text) !important;
   box-shadow: none !important;
-  font-family: var(--hanzo-font-mono);
   font-size: 12px !important;
   line-height: 1.55 !important;
   white-space: pre-wrap;
@@ -569,29 +568,6 @@
 .hanzo-chat-empty-title { color: var(--hanzo-chat-text); font-size: 13px; font-weight: 600; }
 .hanzo-chat-empty-subtitle { margin-top: 2px; color: var(--hanzo-chat-muted); font-size: 11px; }
 
-.hanzo-chat-suggestions { display: grid; gap: 5px; }
-.hanzo-chat-suggestion {
-  display: flex;
-  width: 100%;
-  min-height: 34px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 9px;
-  border: 1px solid var(--hanzo-chat-border);
-  border-radius: var(--hanzo-radius-md);
-  background: transparent;
-  color: var(--hanzo-chat-muted);
-  text-align: left;
-  font-size: 11px;
-  cursor: pointer;
-}
-.hanzo-chat-suggestion:hover {
-  border-color: var(--hanzo-chat-border-strong);
-  background: var(--hanzo-surface-raised);
-  color: var(--hanzo-chat-text);
-}
-.hanzo-chat-suggestion .codicon { opacity: 0.55; }
 
 /* Composer ----------------------------------------------------------------- */
 
@@ -772,7 +748,7 @@
   text-overflow: ellipsis;
   cursor: pointer;
 }
-.hanzo-chat-thinking-select { width: 64px; }
+.hanzo-chat-thinking-select { width: auto; }
 .hanzo-chat-model-select { width: clamp(72px, 22cqw, 132px); }
 .hanzo-chat-thinking-select:hover,
 .hanzo-chat-model-select:hover { color: var(--hanzo-chat-text) !important; }
