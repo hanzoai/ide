@@ -12,13 +12,6 @@
    A static sibling paints beneath it, so every click on "Sign In" landed on the
    drag div — measured in a plain browser, where it made the button unclickable.
    Stacked above it, and told the window it is not a drag handle. */
-.hanzo-account {
-  position: relative;
-  z-index: 1;
-  -webkit-app-region: no-drag;
-}
-.hanzo-account-btn { white-space: nowrap; }
-
 /* ─── 1. Reset & shell ───────────────────────────────────────────────────── */
 
 *, *::before, *::after {

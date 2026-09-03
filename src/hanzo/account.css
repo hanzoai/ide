@@ -1,0 +1,6 @@
+.hanzo-account {
+  position: relative;
+  z-index: 1;
+  -webkit-app-region: no-drag;
+}
+.hanzo-account-btn { white-space: nowrap; }

@@ -4,6 +4,7 @@
 // credential to ~/.hanzo, so this only starts that flow and reflects its
 // result — there is no second login path to keep in step.
 
+import './account.css'
 import { invoke } from '@tauri-apps/api/core'
 import { tauri } from './tauri.ts'
 import { session, signIn, signOut, user } from './iam.ts'
@@ -52,19 +53,19 @@ async function awaitSignIn(render: (a: Account) => void): Promise<void> {
   render({ identity: null, org: null, signed_in: false })
 }
 
-function slot(): HTMLElement | null {
-  const bar = document.querySelector<HTMLElement>('.monaco-workbench .part.titlebar')
-  if (!bar) return null
-  let el = bar.querySelector<HTMLElement>('.hanzo-account')
+/** The control's slot: the workbench titlebar, or whatever a host hands in. */
+function slot(into = document.querySelector<HTMLElement>('.monaco-workbench .part.titlebar')): HTMLElement | null {
+  if (!into) return null
+  let el = into.querySelector<HTMLElement>('.hanzo-account')
   if (el) return el
   el = document.createElement('div')
   el.className = 'hanzo-account'
-  bar.appendChild(el)
+  into.appendChild(el)
   return el
 }
 
-export async function registerAccount(): Promise<void> {
-  const el = slot()
+export async function registerAccount(into?: HTMLElement): Promise<void> {
+  const el = slot(into)
   if (!el) return
 
   const render = (a: Account) => {

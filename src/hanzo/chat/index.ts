@@ -12,6 +12,7 @@ import './styles.css'
 import { marked } from 'marked'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, tauri } from '../tauri.ts'
+import { api } from '../cloud.ts'
 import { S } from './state.ts'
 import type { Agent, Session, StoredMessage, ApprovalMode, ChatMsg } from './types.ts'
 import {
@@ -75,28 +76,34 @@ async function loadHistory(): Promise<void> {
   } catch { /* no history yet */ }
 }
 
+/** The model select shows these, with the chosen one selected. */
+function offer(models: string[]): void {
+  if (!S.modelSelect || !models.length) return
+  S.modelSelect.innerHTML = ''
+  for (const m of models) {
+    const opt = document.createElement('option')
+    opt.value = m
+    opt.textContent = m
+    opt.selected = m === S.selectedModel
+    S.modelSelect.appendChild(opt)
+  }
+}
+
 async function loadModels(): Promise<void> {
+  if (!tauri()) {
+    // Outside the shell the cloud's catalog is the list, and Zen is the default.
+    const res = await fetch(`${api}/v1/models`).catch(() => null)
+    const ids: string[] = res?.ok ? ((await res.json()).data ?? []).map((m: { id: string }) => m.id) : []
+    S.selectedModel ??= ids.includes('zen') ? 'zen' : ids[0] ?? null
+    offer(ids)
+    return
+  }
   try {
     const config = await invoke<any>('engine_get_config')
     S.selectedModel = config?.default_model || null
-    if (S.modelSelect && S.selectedModel) {
-      const opt = document.createElement('option')
-      opt.value = S.selectedModel
-      opt.textContent = S.selectedModel
-      opt.selected = true
-      S.modelSelect.appendChild(opt)
-    }
+    if (S.selectedModel) offer([S.selectedModel])
     const models = await invoke<string[]>('engine_list_provider_models', { providerId: '' }).catch(() => [])
-    if (S.modelSelect && models.length) {
-      S.modelSelect.innerHTML = ''
-      for (const m of models) {
-        const opt = document.createElement('option')
-        opt.value = m
-        opt.textContent = m
-        opt.selected = m === S.selectedModel
-        S.modelSelect.appendChild(opt)
-      }
-    }
+    offer(models)
   } catch { /* config not ready */ }
 }
 

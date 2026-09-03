@@ -7,6 +7,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { tauri } from '../tauri.ts'
 import { token } from '../iam.ts'
+import { api } from '../cloud.ts'
 import { S } from './state.ts'
 import type { ChatResponse, AgentCheckpoint } from './types.ts'
 import {
@@ -189,17 +190,17 @@ export async function doSend(): Promise<void> {
     }
 
     if (!response) {
-      // Cloud streaming. VITE_HANZO_API_URL points this at a cloud binary on
-      // the LAN; unset, it is the platform.
+      // Cloud streaming.
       const bearer = await token()
-      const cloudRes = await fetch(`${import.meta.env.VITE_HANZO_API_URL ?? 'https://api.hanzo.ai'}/v1/chat/completions`, {
+      if (!bearer) throw new Error('Sign in to chat with Hanzo.')
+      const cloudRes = await fetch(`${api}/v1/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
         },
         body: JSON.stringify({
-          model: S.selectedModel || 'enso-auto',
+          model: S.selectedModel || 'zen',
           messages: [
             ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
             ...S.messages.map((m) => ({ role: m.role, content: m.content })),
@@ -263,7 +264,7 @@ export async function doSend(): Promise<void> {
   } catch (err) {
     S.msgList?.querySelector('#hanzo-streaming')?.remove()
     S.streamingBubble = null
-    S.messages.push({ role: 'assistant', content: `Error: ${err}`, ts: new Date() })
+    S.messages.push({ role: 'assistant', content: err instanceof Error ? err.message : String(err), ts: new Date() })
     setStreaming(false)
     renderMessages()
   }
@@ -307,7 +308,7 @@ export async function executeApprovedPlan(): Promise<void> {
   } catch (err) {
     S.msgList?.querySelector('#hanzo-streaming')?.remove()
     S.streamingBubble = null
-    S.messages.push({ role: 'assistant', content: `Error: ${err}`, ts: new Date() })
+    S.messages.push({ role: 'assistant', content: err instanceof Error ? err.message : String(err), ts: new Date() })
     setStreaming(false)
     renderMessages()
   }
@@ -361,7 +362,7 @@ export async function doResume(): Promise<void> {
   } catch (err) {
     S.msgList?.querySelector('#hanzo-streaming')?.remove()
     S.streamingBubble = null
-    S.messages.push({ role: 'assistant', content: `Error: ${err}`, ts: new Date() })
+    S.messages.push({ role: 'assistant', content: err instanceof Error ? err.message : String(err), ts: new Date() })
     setStreaming(false)
     renderMessages()
   }

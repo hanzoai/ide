@@ -23,6 +23,7 @@ import './styles/tokens.css'
 import { invoke } from '@tauri-apps/api/core'
 import { emit, listen, tauri } from './hanzo/tauri.ts'
 import { finish } from './hanzo/iam.ts'
+import { registerAccount } from './hanzo/account.ts'
 
 import { S } from './hanzo/chat/state.ts'
 import type { ChatMsg } from './hanzo/chat/types.ts'
@@ -172,6 +173,7 @@ async function bootstrap(): Promise<void> {
   // 4. Build the chat; Reattach is this window's control.
   const chat = build(root)
   if (tauri()) chat.actions.appendChild(reattach())
+  else await registerAccount(chat.actions)
   if (S.streaming) showStreamingBubble()
 
   // Closing through the OS control still hands the chat back: write the
