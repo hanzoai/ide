@@ -46,7 +46,8 @@ crates/hanzo-shell/src/extension_host.rs
 Hanzo AI/.AGENT_EXECUTION_ROADMAP.md
 Hanzo AI/.hanzo-architecture.md
 Hanzo AI/docs/.flow_strategy.md
-/.hanzo/
+/.hanzo/*
+!/.hanzo/workflows/
 
 # Playwright
 test-results/

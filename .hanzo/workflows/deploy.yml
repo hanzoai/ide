@@ -1,0 +1,45 @@
+name: deploy
+# ide.hanzo.ai is a SITE: the web build of the IDE is static files — index.html,
+# chat.html and hashed assets — and the Sites plane serves exactly that shape
+# from s3://hanzo-sites/hanzo/ide with no pod behind it. The host is declared in
+# hanzoai/universe charts/app/values/hanzo/static-sites.yaml (ide-static +
+# ide-hanzo-ai). The publish mechanics live in bin/site in hanzoai/ci, used by
+# every site the same way; only the slug and the directory are this repo's.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    # Runners with this label are registered to git.hanzo.ai, which reads
+    # .hanzo/workflows; the job never runs on github.com.
+    runs-on: [hanzo-build-linux-amd64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the web IDE
+        run: npm run build
+
+      # The deploy key is read from KMS by the action; the 202 hands back a
+      # prefix-scoped presigned upload grant, so nothing here holds a bucket key.
+      - name: Publish to the Sites plane
+        uses: https://git.hanzo.ai/hanzoai/ci/.github/actions/site@v1
+        with:
+          slug: ide
+          dir: dist
+        env:
+          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
