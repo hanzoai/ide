@@ -75,3 +75,28 @@ host streams from the stubbed cloud — against `vite --port 5180`). There is no
 spellings of the typeface. A commit once inlined the mono stack in their place
 and its replace ate the closing quotes at six sites; HEAD did not compile.
 Reference the variable.
+
+## Release and Distribution
+
+Hanzo IDE builds native installer bundles and updater archives across all tier-1 desktop targets:
+- **macOS Universal**: `universal-apple-darwin` producing `.dmg` (Apple Silicon + Intel universal binary) and `.app.tar.gz`
+- **Linux amd64**: `x86_64-unknown-linux-gnu` producing `.AppImage` and `.deb` (signed with Cosign keyless OIDC)
+- **Linux arm64**: `aarch64-unknown-linux-gnu` producing `.AppImage` and `.deb` (signed with Cosign keyless OIDC)
+- **Windows x64**: `x86_64-pc-windows-msvc` producing NSIS `*-setup.exe` and `.msi` (signed with GCP KMS EV code signing)
+
+Workflows:
+- `.github/workflows/desktop-release.yml`: Runs on GitHub Actions on version tags (`v*`) or manual `workflow_dispatch`.
+- `.hanzo/workflows/desktop-release.yml`: Runs on the Forge (`git.hanzo.ai`).
+
+Distribution Planes:
+- Canonical CDN: Cloudflare R2 bucket `hanzo-download` staged under `hanzo-ide/`:
+  - Versioned: `https://download.hanzo.ai/hanzo-ide/binaries/production/${arch}/${version}.${run_number}/`
+  - Stable aliases: `https://download.hanzo.ai/hanzo-ide/latest/` (`hanzo-ide-macos.dmg`, `hanzo-ide-linux.AppImage`, `hanzo-ide-windows.exe`, etc.)
+  - Auto-updater manifest: `https://download.hanzo.ai/hanzo-ide/binaries/production/updates.json`
+- Canonical Release: GitHub Releases (`https://github.com/hanzoai/ide/releases/tag/v*`) with all platform installers attached.
+- Web IDE plane: `ide.hanzo.ai` deployed via `.hanzo/workflows/deploy.yml` from `dist/` to `s3://hanzo-sites/hanzo/ide`.
+
+Local Bundle Commands:
+- `npm run build` (builds `node-extension-host` + `tsc` + `vite`)
+- `npm run tauri:build` or `npx tauri build --ignore-version-mismatches` (builds release binary and platform bundle)
+

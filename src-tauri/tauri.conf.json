@@ -24,7 +24,14 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "app",
+      "dmg",
+      "appimage",
+      "deb",
+      "nsis",
+      "msi"
+    ],
     "category": "DeveloperTool",
     "copyright": "Copyright © 2026 Hanzo AI. All rights reserved.",
     "shortDescription": "AI-native IDE",
@@ -42,7 +49,8 @@
     "macOS": {
       "minimumSystemVersion": "10.15",
       "entitlements": "entitlements.plist"
-    }
+    },
+    "createUpdaterArtifacts": "v1Compatible"
   },
   "plugins": {
     "shell": {
@@ -50,9 +58,13 @@
     },
     "updater": {
       "endpoints": [
-        "https://releases.hanzo.ai/ide/{{target}}/{{arch}}/{{current_version}}"
+        "https://download.hanzo.ai/hanzo-ide/binaries/production/updates.json",
+        "https://github.com/hanzoai/ide/releases/latest/download/latest.json"
       ],
-      "pubkey": "PLACEHOLDER_GENERATE_WITH_TAURI_SIGNER"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJCN0NBN0FEOUYyQzY0QzcKUldUSFpDeWZyYWQ4dTlqMHhtK293c3BSc2RsTGo2eEtyOGpOSE9YRllqSUo5Q0o4V0IzQ0xpTlQK",
+      "windows": {
+        "installMode": "basicUi"
+      }
     }
   }
 }
