@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Hanzo",
+  "productName": "Hanzo IDE",
   "version": "0.1.0",
   "identifier": "ai.hanzo.ide",
   "build": {

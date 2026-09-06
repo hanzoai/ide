@@ -46,7 +46,7 @@ async fn open_new_window(app: tauri::AppHandle, folder_path: Option<String>) -> 
     };
 
     tauri::WebviewWindowBuilder::new(&app, &window_id, url)
-        .title("Hanzo")
+        .title("Hanzo IDE")
         .inner_size(1440.0, 900.0)
         .min_inner_size(900.0, 600.0)
         .center()
@@ -542,7 +542,7 @@ pub fn run() {
                 let url = WebviewUrl::default();
 
                 let win = WebviewWindowBuilder::new(app, "main", url)
-                    .title("Hanzo")
+                    .title("Hanzo IDE")
                     .inner_size(1440.0, 900.0)
                     .min_inner_size(900.0, 600.0)
                     .resizable(true)
