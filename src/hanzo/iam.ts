@@ -39,3 +39,43 @@ export async function finish(): Promise<void> {
   await handleCallback()
   history.replaceState(null, '', location.pathname)
 }
+
+/**
+ * The organizations this person may act in, home org FIRST.
+ *
+ * The same read the console makes: membership rows from `/v1/iam/memberships`,
+ * unioned with the account's own org, which is implicit and never a row. IAM is
+ * addressed by collection — a hyphenated verb answers 410 — so the path is the
+ * plural noun and the method is the verb.
+ *
+ * Signed out, or on any refusal, this is empty: a switcher with nothing in it
+ * says "no orgs", which is true, where a thrown error would take the titlebar
+ * down with it.
+ */
+export async function orgs(): Promise<string[]> {
+  const u = await getUser().catch(() => null)
+  const home = (u?.owner ?? '').trim()
+  const id = [u?.owner, u?.name].filter(Boolean).join('/')
+  let rows: { org?: string }[] = []
+  if (id) {
+    const bearer = await token().catch(() => null)
+    if (bearer) {
+      const base = import.meta.env.VITE_HANZO_API_URL ?? 'https://api.hanzo.ai'
+      const url = `${base}/v1/iam/memberships?user=${encodeURIComponent(id)}`
+      const body = await fetch(url, { headers: { Authorization: `Bearer ${bearer}`, Accept: 'application/json' } })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null)
+      // A collection keys its rows by its own name.
+      if (body && Array.isArray(body.memberships)) rows = body.memberships
+    }
+  }
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const name of [home, ...rows.map((m) => m.org ?? '')]) {
+    const n = (name ?? '').trim()
+    if (!n || seen.has(n)) continue
+    seen.add(n)
+    out.push(n)
+  }
+  return out
+}

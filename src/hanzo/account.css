@@ -1,6 +1,62 @@
+/* Identity in the title row: the org, then the account under it.
+ *
+ * Sits top-LEFT, where hanzo.ai puts it. `no-drag` because the titlebar is the
+ * window's drag handle and a control inside it must take its own clicks. */
 .hanzo-account {
   position: relative;
   z-index: 1;
   -webkit-app-region: no-drag;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5ch;
+  padding-inline: 0.75rem;
+  min-width: 0;
 }
-.hanzo-account-btn { white-space: nowrap; }
+
+/* Both lines share the row, so both truncate rather than push the titlebar
+ * wider than the window: an org named by a customer has no length limit. */
+.hanzo-account-org,
+.hanzo-account-btn,
+.hanzo-account-switch {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 22ch;
+  font-family: var(--hanzo-font-ui);
+}
+
+/* The org leads: it is the thing that decides whose work is on screen. */
+.hanzo-account-org,
+.hanzo-account-switch {
+  font-weight: 600;
+  color: var(--vscode-titleBar-activeForeground, inherit);
+}
+
+/* A menu, but not a form control — it wears the titlebar, not the platform. */
+.hanzo-account-switch {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0 1.2ch 0 0;
+  cursor: pointer;
+  /* the caret, drawn rather than inherited, so it matches at any theme */
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-size: 4px 4px, 4px 4px;
+  background-position: right 4px center, right 1px center;
+  background-repeat: no-repeat;
+}
+.hanzo-account-switch:hover { opacity: 0.85; }
+
+/* The account is the quiet half: present, legible, not competing with the org. */
+.hanzo-account-who {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9em;
+  opacity: 0.7;
+  color: inherit;
+}
+.hanzo-account-who:hover { opacity: 1; }
+.hanzo-account-who:disabled { opacity: 0.4; cursor: default; }
