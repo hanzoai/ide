@@ -21,7 +21,7 @@ jobs:
     # .github/workflows too, so this one file is the whole definition and there
     # is no second copy to drift. `uses:` is the short form for the same reason —
     # a full https:// target is a Gitea extension github.com cannot resolve.
-    runs-on: [hanzo-build-linux-amd64]
+    runs-on: [linux-amd64]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
