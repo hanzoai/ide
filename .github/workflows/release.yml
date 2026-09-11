@@ -67,7 +67,7 @@ jobs:
           # linux-amd64 -> ARC scale set "hanzo-build-linux-amd64" (evo)
           - id: linux-amd64
             arch: x86_64-unknown-linux-gnu
-            os: hanzo-build-linux-amd64
+            os: linux-amd64
             tauri_target: ''
             installer_glob: 'appimage/*.AppImage'
             updater_glob: 'appimage/*.AppImage.tar.gz'
@@ -79,7 +79,7 @@ jobs:
           # linux-arm64 -> ARC scale-set "hanzoai-arm64" (spark)
           - id: linux-arm64
             arch: aarch64-unknown-linux-gnu
-            os: hanzoai-arm64
+            os: [self-hosted, Linux, ARM64]
             tauri_target: ''
             installer_glob: 'appimage/*.AppImage'
             updater_glob: 'appimage/*.AppImage.tar.gz'
@@ -407,7 +407,7 @@ jobs:
       - prebuild
       - release-hanzo-ide
     name: Generate & Publish updates.json
-    runs-on: hanzo-build-linux-amd64
+    runs-on: linux-amd64
     timeout-minutes: 20
     steps:
       - name: Check out repository
