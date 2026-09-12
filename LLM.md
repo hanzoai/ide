@@ -100,3 +100,14 @@ Local Bundle Commands:
 - `npm run build` (builds `node-extension-host` + `tsc` + `vite`)
 - `npm run tauri:build` or `npx tauri build --ignore-version-mismatches` (builds release binary and platform bundle)
 
+## 2026-09-12: macOS Bundle Build & Disentanglement from Desktop
+
+- **Bundle Reconciliation**:
+  - Built production release bundle `target/release/bundle/macos/Hanzo IDE.app` (`ai.hanzo.ide`).
+  - Installed into `/Applications/Hanzo IDE.app`, replacing previous erroneous desktop chat shell install.
+  - Verified bundle metadata: `CFBundleIdentifier` = `ai.hanzo.ide`, `CFBundleName` = `Hanzo IDE`.
+  - Verified icon asset: monochrome white mark (`255, 255, 255`) on dark slate (`#0a0a0a`).
+  - Verified runtime server: opens local HTTP frontend and registers Zap bus on `~/.hanzo/ide.sock`.
+  - Verified test suite: 7/7 Playwright tests passing (`npx playwright test`).
+
+
