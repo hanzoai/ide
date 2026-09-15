@@ -64,7 +64,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # linux-amd64 -> ARC scale set "hanzo-build-linux-amd64" (evo)
+          # linux-amd64 -> ARC scale set "linux-amd64" (evo)
           - id: linux-amd64
             arch: x86_64-unknown-linux-gnu
             os: linux-amd64
