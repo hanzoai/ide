@@ -11,7 +11,7 @@
     "test": "node test/smoke.mjs"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
+    "typescript": "7.0.2",
     "@types/node": "^22.0.0"
   }
 }
