@@ -52,3 +52,8 @@ Hanzo AI/docs/.flow_strategy.md
 # Playwright
 test-results/
 playwright-report/
+
+# Local symlinks to LLM.md
+CLAUDE.md
+AGENTS.md
+GEMINI.md
