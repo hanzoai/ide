@@ -1,8 +1,12 @@
 /**
- * Hanzo Inline Edit — Cmd+K
+ * Hanzo Inline Edit — Cmd+I (Cmd+Shift+K)
  *
- * Select code → press Cmd+K → type instruction → agent returns edited code
- * with inline diff preview. Accept or reject.
+ * Select code → press Cmd+I (or click the floating Inline Edit pill / right-click
+ * context menu / Command Palette) → type instruction → agent returns edited code
+ * with inline preview. Accept or reject.
+ *
+ * Avoids bare Cmd+K so VS Code's universal chord prefix (Cmd+K Cmd+S, Cmd+K Cmd+O,
+ * Cmd+K Cmd+W, Cmd+K Z) continues to work without collision.
  *
  * Uses Hanzo AI engine_chat_send with the selection as context.
  * Streams via engine-event for real-time feedback.
@@ -32,10 +36,12 @@ interface CapturedSelection {
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let _overlay: HTMLElement | null = null
+let _selectionPill: HTMLElement | null = null
 let _runId: string | null = null
 let _unlisten: UnlistenFn | null = null
 let _accum = ''
 let _captured: CapturedSelection | null = null
+const _wiredEditors = new WeakSet<object>()
 
 const INLINE_SYSTEM_PROMPT = `You are Hanzo's inline code editor. The user has selected code and wants you to modify it.
 
@@ -48,39 +54,175 @@ Rules:
 // ─── Registration ─────────────────────────────────────────────────────────────
 
 export function registerInlineEdit(): void {
-  // Register as a VS Code command so it can be invoked from the command palette
-  // or bound to a keybinding (Cmd+K is handled by VS Code's chord system).
-  import('@codingame/monaco-vscode-api/vscode/vs/platform/commands/common/commands').then(({ CommandsRegistry }) => {
-    CommandsRegistry.registerCommand('hanzo.inlineEdit', () => showInlinePrompt())
-  }).catch(console.warn)
+  void registerInlineAction()
+  void registerSelectionAffordance()
 
-  // Also register Cmd+K keybinding directly on the editor
-  registerKeybinding().catch(console.warn)
-
-  console.log('[hanzo-inline] inline edit registered as hanzo.inlineEdit command')
+  console.log('[hanzo-inline] inline edit registered as hanzo.inlineEdit action (Cmd+I / Cmd+Shift+K)')
 }
 
-async function registerKeybinding(): Promise<void> {
+async function registerInlineAction(): Promise<void> {
+  try {
+    const { Action2, registerAction2, MenuId } = (await import(
+      '@codingame/monaco-vscode-api/vscode/vs/platform/actions/common/actions'
+    )) as any
+    if (!registerAction2 || !Action2) return
+
+    registerAction2(
+      class extends Action2 {
+        static readonly id = 'hanzo.inlineEdit'
+        constructor() {
+          super({
+            id: 'hanzo.inlineEdit',
+            title: {
+              value: 'Hanzo: Inline Edit Selection',
+              original: 'Hanzo: Inline Edit Selection',
+            },
+            f1: true,
+            // Primary: CtrlCmd(2048) | KeyI(39) — VS Code's standard inline assist
+            // shortcut, avoiding the Cmd+K chord prefix collision (#2).
+            // Secondary: CtrlCmd(2048) | Shift(1024) | KeyK(41) (Cmd+Shift+K).
+            keybinding: {
+              primary: 2048 /* KeyMod.CtrlCmd */ | 39 /* KeyCode.KeyI */,
+              secondary: [2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 41 /* KeyCode.KeyK */],
+              weight: 1000,
+            },
+            menu: MenuId?.EditorContext
+              ? [
+                  {
+                    id: MenuId.EditorContext,
+                    group: '1_modification',
+                    order: 1.5,
+                  },
+                ]
+              : undefined,
+          })
+        }
+        async run(): Promise<void> {
+          await showInlinePrompt()
+        }
+      },
+    )
+  } catch (e) {
+    console.warn('[hanzo-inline] action registration failed:', e)
+  }
+}
+
+function hideSelectionPill(): void {
+  if (_selectionPill) {
+    _selectionPill.style.display = 'none'
+  }
+}
+
+function ensureSelectionPill(): HTMLElement {
+  if (_selectionPill && document.body.contains(_selectionPill)) {
+    return _selectionPill
+  }
+  const pill = document.createElement('button')
+  pill.id = 'hanzo-inline-selection-pill'
+  pill.type = 'button'
+  pill.setAttribute('aria-label', 'Hanzo Inline Edit Selection (Cmd+I)')
+  pill.style.cssText = [
+    'position:fixed',
+    'display:none',
+    'align-items:center',
+    'gap:6px',
+    'padding:3px 8px',
+    'border-radius:5px',
+    'font-family:var(--hanzo-font-ui, sans-serif)',
+    'font-size:11px',
+    'font-weight:500',
+    'line-height:1.4',
+    'color:var(--vscode-editorWidget-foreground, #e5e5e5)',
+    'background:var(--vscode-editorWidget-background, #1c1c1e)',
+    'border:1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.14))',
+    'box-shadow:0 4px 12px rgba(0,0,0,0.35)',
+    'cursor:pointer',
+    'z-index:9999',
+    'user-select:none',
+  ].join(';')
+  pill.innerHTML = '<span>✦ Edit</span><span style="opacity:0.55;font-size:10px">⌘I</span>'
+  pill.addEventListener('mousedown', (e) => {
+    // Keep editor selection intact when clicking the floating action pill.
+    e.preventDefault()
+    e.stopPropagation()
+  })
+  pill.addEventListener('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    hideSelectionPill()
+    void showInlinePrompt()
+  })
+  document.body.appendChild(pill)
+  _selectionPill = pill
+  return pill
+}
+
+function updateSelectionPillForEditor(editor: any): void {
+  try {
+    if (_overlay) {
+      hideSelectionPill()
+      return
+    }
+    const model = editor?.getModel?.()
+    const selection = editor?.getSelection?.()
+    if (!model || !selection || selection.isEmpty?.()) {
+      hideSelectionPill()
+      return
+    }
+    const selectedText = model.getValueInRange?.(selection) ?? ''
+    if (!selectedText.trim()) {
+      hideSelectionPill()
+      return
+    }
+    const domNode: HTMLElement | null = editor.getDomNode?.() ?? null
+    if (!domNode) {
+      hideSelectionPill()
+      return
+    }
+    const startPos = {
+      lineNumber: selection.startLineNumber,
+      column: selection.startColumn,
+    }
+    const scrolled = editor.getScrolledVisiblePosition?.(startPos)
+    const rect = domNode.getBoundingClientRect()
+    if (!scrolled || rect.width === 0 || rect.height === 0) {
+      hideSelectionPill()
+      return
+    }
+
+    const pill = ensureSelectionPill()
+    const top = Math.max(8, rect.top + scrolled.top - 28)
+    const left = Math.min(
+      window.innerWidth - 110,
+      Math.max(rect.left + 16, rect.left + scrolled.left),
+    )
+    pill.style.top = `${top}px`
+    pill.style.left = `${left}px`
+    pill.style.display = 'inline-flex'
+  } catch {
+    hideSelectionPill()
+  }
+}
+
+async function registerSelectionAffordance(): Promise<void> {
   try {
     const editorService = await getService(ICodeEditorService)
 
-    // Wire keybinding on each editor that gets created.
-    // Monaco's KeyMod/KeyCode enums aren't statically importable in this
-    // build; documented values from Monaco's standaloneKeybindingService.
     const wireEditor = (editor: any) => {
-      editor.addCommand?.(2048 /* KeyMod.CtrlCmd */ | 41 /* KeyCode.KeyK */, () => {
-        showInlinePrompt()
-      })
+      if (!editor || typeof editor !== 'object' || _wiredEditors.has(editor)) return
+      _wiredEditors.add(editor)
+      editor.onDidChangeCursorSelection?.(() => updateSelectionPillForEditor(editor))
+      editor.onDidScrollChange?.(() => updateSelectionPillForEditor(editor))
+      editor.onDidBlurEditorText?.(() => hideSelectionPill())
+      editor.onDidDispose?.(() => hideSelectionPill())
     }
 
-    // Wire existing editors
     const existing: any[] = Array.from((editorService as any).listCodeEditors?.() || [])
     for (const ed of existing) wireEditor(ed)
 
-    // Wire future editors
     ;(editorService as any).onCodeEditorAdd?.((editor: any) => wireEditor(editor))
   } catch (e) {
-    console.debug('[hanzo-inline] keybinding registration deferred:', e)
+    console.debug('[hanzo-inline] selection affordance registration deferred:', e)
   }
 }
 
@@ -115,8 +257,9 @@ async function captureSelection(): Promise<CapturedSelection | null> {
 // ─── Show Inline Prompt ───────────────────────────────────────────────────────
 
 async function showInlinePrompt(): Promise<void> {
-  // Remove any existing overlay
+  // Remove any existing overlay or floating selection pill
   dismissOverlay()
+  hideSelectionPill()
 
   // Capture the current editor selection
   _captured = await captureSelection()
@@ -147,7 +290,7 @@ async function showInlinePrompt(): Promise<void> {
     ? `<span style="font-size:10px;opacity:0.7;margin-left:8px">${_captured.filePath.split('/').pop()} · ${_captured.text.split('\n').length} lines</span>`
     : '<span style="font-size:10px;opacity:0.5;margin-left:8px">⚠ No selection — select code first</span>'
 
-  header.innerHTML = `<span>Inline Edit (Cmd+K)${selectionInfo}</span><span style="font-size:10px;opacity:0.5">Esc to dismiss</span>`
+  header.innerHTML = `<span>Inline Edit (⌘I)${selectionInfo}</span><span style="font-size:10px;opacity:0.5">Esc to dismiss</span>`
   overlay.appendChild(header)
 
   // Show captured selection preview
@@ -164,7 +307,7 @@ async function showInlinePrompt(): Promise<void> {
   // Input
   const input = document.createElement('input')
   input.type = 'text'
-  input.placeholder = _captured ? 'Describe the change…' : 'Select code first, then press Cmd+K'
+  input.placeholder = _captured ? 'Describe the change…' : 'Select code first, then press ⌘I'
   input.disabled = !_captured
   input.style.cssText = 'padding:10px 12px;background:var(--vscode-input-background);border:none;outline:none;color:var(--vscode-input-foreground);font-size:13px;font-family:var(--hanzo-font-ui)'
   input.addEventListener('keydown', (e) => {
