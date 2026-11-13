@@ -42,12 +42,16 @@ export function loadPrefs(): ChatPrefs {
     if (!raw) return { ...DEFAULTS }
     const parsed = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null) return { ...DEFAULTS }
-    return {
+    const prefs: ChatPrefs = {
       approvalMode: validApprovalMode(parsed.approvalMode) ?? DEFAULTS.approvalMode,
       thinkingLevel: validThinkingLevel(parsed.thinkingLevel) ?? DEFAULTS.thinkingLevel,
       planMode: typeof parsed.planMode === 'boolean' ? parsed.planMode : DEFAULTS.planMode,
       selectedAgentId: typeof parsed.selectedAgentId === 'string' ? parsed.selectedAgentId : null,
     }
+    if (parsed.approvalMode === 'yolo') {
+      savePrefs(prefs)
+    }
+    return prefs
   } catch (e) {
     console.warn('[hanzo-chat:prefs] load failed, using defaults:', e)
     return { ...DEFAULTS }
