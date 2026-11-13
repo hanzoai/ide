@@ -56,10 +56,12 @@
 
 .hanzo-chat-topbar {
   display: flex !important;
-  flex-direction: column;
+  flex-direction: row;
   flex-shrink: 0;
-  gap: 5px !important;
-  padding: 7px 8px 6px !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px !important;
+  padding: 5px 8px !important;
   background: var(--hanzo-chat-panel) !important;
   border-bottom: 1px solid var(--hanzo-border-subtle) !important;
   box-shadow: none !important;
@@ -73,8 +75,12 @@
   align-items: center;
 }
 
-.hanzo-chat-topbar-main { gap: 5px; }
-.hanzo-chat-topbar-context { gap: 6px; }
+.hanzo-chat-topbar-main {
+  flex: 1 1 auto;
+  gap: 4px;
+  overflow: hidden;
+}
+.hanzo-chat-topbar-context { gap: 4px; }
 .hanzo-chat-topbar-actions { gap: 2px; flex-shrink: 0; }
 
 .hanzo-chat-context-label {
@@ -90,16 +96,16 @@
 .hanzo-chat-topbar select,
 .hanzo-chat-select {
   min-width: 0;
-  height: 28px;
-  padding: 0 24px 0 8px !important;
+  height: 26px;
+  padding: 0 20px 0 7px !important;
   overflow: hidden;
-  border: 1px solid transparent !important;
+  border: 1px solid var(--hanzo-chat-border) !important;
   border-radius: var(--hanzo-radius-md) !important;
   background: var(--hanzo-chat-control) !important;
   color: var(--hanzo-chat-text) !important;
   box-shadow: none !important;
   font-size: 11px !important;
-  line-height: 26px;
+  line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
@@ -119,8 +125,9 @@
   outline: none !important;
 }
 
-.hanzo-chat-session-select { flex: 1 1 auto; }
-.hanzo-chat-agent-select { flex: 1 1 auto; width: 100%; }
+.hanzo-chat-session-select { flex: 1 1 96px; min-width: 64px; }
+.hanzo-chat-agent-select { flex: 0 1 112px; min-width: 56px; }
+.hanzo-chat-topbar .hanzo-chat-model-select { flex: 0 1 108px; min-width: 56px; width: auto; }
 
 .hanzo-chat-topbar button,
 .hanzo-chat-icon-button {
@@ -138,6 +145,12 @@
   box-shadow: none !important;
   cursor: pointer !important;
   transition: color var(--hanzo-transition-fast), background var(--hanzo-transition-fast), border-color var(--hanzo-transition-fast) !important;
+}
+
+.hanzo-chat-topbar button.hanzo-account-btn {
+  width: auto !important;
+  padding: 0 8px !important;
+  font-size: 11px !important;
 }
 
 .hanzo-chat-topbar button:hover,
@@ -244,7 +257,7 @@
   border-radius: 50%;
   background: var(--hanzo-surface-raised);
   color: var(--hanzo-chat-text);
-  box-shadow: var(--hanzo-shadow-md);
+  box-shadow: none;
   cursor: pointer;
 }
 
@@ -583,8 +596,9 @@
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 6px !important;
+  gap: 0 !important;
   padding: 8px !important;
+  border-top: 1px solid var(--hanzo-border-subtle) !important;
   background: var(--hanzo-chat-panel) !important;
 }
 
@@ -594,15 +608,15 @@
   flex-direction: column;
   overflow: visible;
   border: 1px solid var(--hanzo-chat-border-strong);
-  border-radius: var(--hanzo-radius-lg);
+  border-radius: var(--hanzo-radius-md);
   background: var(--hanzo-chat-control);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-  transition: border-color var(--hanzo-transition-fast), box-shadow var(--hanzo-transition-fast);
+  box-shadow: none !important;
+  transition: border-color var(--hanzo-transition-fast);
 }
 
 .hanzo-chat-composer:focus-within {
   border-color: var(--vscode-focusBorder, var(--hanzo-border-focus));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vscode-focusBorder, var(--hanzo-accent)) 18%, transparent);
+  box-shadow: none !important;
 }
 
 .hanzo-chat-input-row {
@@ -830,10 +844,9 @@
   align-items: center;
   gap: 6px;
   margin: 0;
-  padding: 6px 8px;
-  border: 1px solid var(--hanzo-chat-border);
-  border-radius: var(--hanzo-radius-md);
-  background: var(--hanzo-chat-control);
+  padding: 5px 8px;
+  border-top: 1px solid var(--hanzo-border-subtle);
+  background: transparent;
 }
 .hanzo-whisper-input {
   min-width: 0;
