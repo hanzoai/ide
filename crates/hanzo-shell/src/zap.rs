@@ -48,7 +48,10 @@ pub async fn serve(app: AppHandle, workspace: Option<String>) {
             return;
         }
     }
+    #[cfg(unix)]
     let addr = path.to_string_lossy().to_string();
+    #[cfg(not(unix))]
+    let addr = "127.0.0.1:0".to_string();
 
     let server = Server::listen(&addr, move |_conn| {
         let app = app.clone();

@@ -17,3 +17,6 @@ tokio = { version = "1", features = ["full"] }
 log = "0.4"
 uuid = { version = "1", features = ["v4"] }
 async-trait = "0.1"
+
+[patch.crates-io]
+zapwire = { path = "crates/zapwire" }
