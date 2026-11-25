@@ -10,7 +10,13 @@ import './zen-workspace.css'
 import { renderHanzoMarkSvg, zenIcon } from './brand.ts'
 import { getWorkspace } from './ide-context.ts'
 import { formatQuickTopbarLabel } from './mcp-catalog.ts'
-import { HANZO_SHELL_GEOMETRY, isMacDesktopPlatform } from './theme.ts'
+import {
+  HANZO_SHELL_GEOMETRY,
+  isMacDesktopPlatform,
+  persistLayoutSide,
+  readStoredLayoutSide,
+  type HanzoLayoutSide,
+} from './theme.ts'
 import {
   getWorkspacePath,
   openWorkspaceFolderPath,
@@ -851,10 +857,28 @@ function mountEditorTabBarPlusButton(): void {
     })
 }
 
+export async function toggleLayoutSide(target?: HanzoLayoutSide): Promise<HanzoLayoutSide> {
+  const current = readStoredLayoutSide()
+  const next: HanzoLayoutSide = target ?? (current === 'ai-left' ? 'tree-left' : 'ai-left')
+  persistLayoutSide(next)
+  document.documentElement.dataset.hanzoLayoutSide = next
+  if (next !== current) {
+    await execZenCommand('workbench.action.toggleSidebarPosition')
+    setTimeout(ensureComfortablePaneSizes, 50)
+  }
+  showZenToast(
+    next === 'ai-left'
+      ? 'Reference layout: AI pane left, file tree right'
+      : 'Default layout: file tree left, AI pane right',
+  )
+  return next
+}
+
 export async function initializeZenWorkspace(): Promise<void> {
   const ws = activeWorkspacePath()
   if (ws) recordZenRecentFolder(ws)
   state = loadState()
+  document.documentElement.dataset.hanzoLayoutSide = readStoredLayoutSide()
 
   await ensureServices()
   mountWelcomeAndBrowserInEditor()

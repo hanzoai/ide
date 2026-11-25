@@ -756,6 +756,15 @@ export async function initializeDeferredFeatures(): Promise<void> {
     const next: HanzoThemeId = cur === 'zen' ? 'clay' : cur === 'clay' ? 'light' : 'zen'
     return setTheme(next)
   })
+  CommandsRegistry.registerCommand('hanzo.toggleLayoutSide', () =>
+    import('./hanzo/zen-workspace.ts').then(({ toggleLayoutSide }) => toggleLayoutSide()),
+  )
+  CommandsRegistry.registerCommand('hanzo.useReferenceLayout', () =>
+    import('./hanzo/zen-workspace.ts').then(({ toggleLayoutSide }) => toggleLayoutSide('ai-left')),
+  )
+  CommandsRegistry.registerCommand('hanzo.useDefaultLayout', () =>
+    import('./hanzo/zen-workspace.ts').then(({ toggleLayoutSide }) => toggleLayoutSide('tree-left')),
+  )
   if (tauri()) {
     const { setDockIconMode } = await import('./hanzo/dock-icon.ts')
     CommandsRegistry.registerCommand('hanzo.dockIcon.branded', () => setDockIconMode('branded'))

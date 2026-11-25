@@ -401,3 +401,15 @@ html[data-zen-focus='true'] .monaco-workbench .breadcrumbs-below-tabs {
   background: #111111;
   color: #9e9e9e;
 }
+
+/* ── Reference Layout (`ai-left`: AI pane left, file tree right, denser status bar) ─ */
+
+html[data-hanzo-layout-side='ai-left'] .monaco-workbench .part.statusbar {
+  height: 20px !important;
+  line-height: 20px !important;
+  font-size: 11px !important;
+}
+
+html[data-hanzo-layout-side='ai-left'] .monaco-workbench .part.statusbar > .items-container > .statusbar-item {
+  line-height: 20px !important;
+}

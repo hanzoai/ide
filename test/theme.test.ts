@@ -17,6 +17,9 @@ import {
   buildWorkbenchColorCustomizations,
   buildWorkbenchConfigurationDefaults,
   isAllowedModelId,
+  persistLayoutSide,
+  readStoredLayoutSide,
+  sideBarLocationForLayout,
 } from '../src/hanzo/theme.ts'
 import { renderHanzoMarkSvg, zenIcon } from '../src/hanzo/brand.ts'
 import { MOBILE_APP_DOWNLOADS } from '../src/hanzo/phone-app-modal.ts'
@@ -279,4 +282,25 @@ test('IAM config, Sign-In SVG, and Get Hanzo on your phone match Hanzo Dev & Des
   assert.ok(signInTs.includes('Sign in to Hanzo IDE'))
   assert.ok(signInTs.includes('Continue without signing in'))
   assert.ok(signInTs.includes('M23.745 12.27'), 'must use exact canonical @hanzo/ui Google SVG')
+})
+
+test('Reference layout toggle flips workbench.sideBar.location (AI pane left, tree right) and denser status bar', () => {
+  assert.equal(sideBarLocationForLayout('tree-left'), 'left')
+  assert.equal(sideBarLocationForLayout('ai-left'), 'right')
+
+  const defaultCfg = buildWorkbenchConfigurationDefaults('tree-left')
+  const refCfg = buildWorkbenchConfigurationDefaults('ai-left')
+  assert.equal(defaultCfg['workbench.sideBar.location'], 'left')
+  assert.equal(refCfg['workbench.sideBar.location'], 'right')
+
+  // Persistence helper falls back safely without browser localStorage
+  persistLayoutSide('ai-left')
+  assert.equal(readStoredLayoutSide(), 'tree-left')
+
+  const workbenchTs = fs.readFileSync(path.join(rootDir, 'src/workbench.ts'), 'utf8')
+  assert.ok(workbenchTs.includes('hanzo.toggleLayoutSide'))
+  assert.ok(workbenchTs.includes('hanzo.useReferenceLayout'))
+
+  const zenCss = fs.readFileSync(path.join(rootDir, 'src/hanzo/zen-workspace.css'), 'utf8')
+  assert.ok(zenCss.includes("html[data-hanzo-layout-side='ai-left']"))
 })

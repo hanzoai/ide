@@ -458,11 +458,42 @@ export function buildZenTokenColorCustomizations(): Record<string, unknown> {
   }
 }
 
-export function buildWorkbenchConfigurationDefaults(): Record<string, unknown> {
+export type HanzoLayoutSide = 'tree-left' | 'ai-left'
+
+export const HANZO_LAYOUT_SIDE_STORAGE_KEY = 'hanzo.ide.layoutSide'
+
+export function readStoredLayoutSide(): HanzoLayoutSide {
+  try {
+    if (typeof localStorage === 'undefined') return 'tree-left'
+    const stored = localStorage.getItem(HANZO_LAYOUT_SIDE_STORAGE_KEY)
+    return stored === 'ai-left' ? 'ai-left' : 'tree-left'
+  } catch {
+    return 'tree-left'
+  }
+}
+
+export function persistLayoutSide(side: HanzoLayoutSide): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(HANZO_LAYOUT_SIDE_STORAGE_KEY, side)
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+export function sideBarLocationForLayout(side: HanzoLayoutSide): 'left' | 'right' {
+  return side === 'ai-left' ? 'right' : 'left'
+}
+
+export function buildWorkbenchConfigurationDefaults(
+  layoutSide: HanzoLayoutSide = readStoredLayoutSide(),
+): Record<string, unknown> {
   return {
     'workbench.colorTheme': HANZO_ZEN_PALETTE.baseVsCodeTheme,
     'workbench.preferredDarkColorTheme': HANZO_ZEN_PALETTE.baseVsCodeTheme,
     'workbench.preferredLightColorTheme': HANZO_LIGHT_PALETTE.baseVsCodeTheme,
+    'workbench.sideBar.location': sideBarLocationForLayout(layoutSide),
     'editor.tokenColorCustomizations': buildZenTokenColorCustomizations(),
     'editor.fontFamily': "'Zen Mono', monospace",
     'terminal.integrated.fontFamily': "'Zen Mono', monospace",
