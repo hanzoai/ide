@@ -324,6 +324,7 @@ function syncWelcomeAndStatusVisibility(): void {
   if (browserEl) {
     browserEl.hidden = !state.browser
   }
+  document.documentElement.dataset.zenBrowser = String(state.browser)
   if (scratchHintEl) {
     scratchHintEl.hidden = !(anyEditor && !state.browser && openCount === 1)
   }
@@ -462,6 +463,11 @@ export async function toggleZenPanel(panel: ZenPanelKey): Promise<void> {
     }
   } else if (panel === 'browser') {
     state.browser = !state.browser
+    if (state.browser) {
+      queueMicrotask(() => {
+        browserEl?.dispatchEvent(new CustomEvent('hanzo:browser-opened'))
+      })
+    }
   } else if (panel === 'right') {
     if (state.integrations) {
       state.integrations = false
@@ -673,7 +679,23 @@ function mountWelcomeAndBrowserInEditor(): void {
     urlInput.type = 'text'
     urlInput.className = 'hanzo-zen-browser-url'
     urlInput.setAttribute('aria-label', 'Preview address')
-    urlInput.value = 'http://localhost:3000'
+    urlInput.value = localStorage.getItem('hanzo.ide.browserUrl') || 'http://localhost:3000'
+
+    const extBtn = document.createElement('button')
+    extBtn.type = 'button'
+    extBtn.className = 'hanzo-zen-ib'
+    extBtn.title = 'Open in system browser'
+    extBtn.setAttribute('aria-label', 'Open in system browser')
+    extBtn.innerHTML = zenIcon('popout', 14)
+    extBtn.addEventListener('click', async () => {
+      const targetUrl = urlInput.value.trim() || 'http://localhost:3000'
+      try {
+        const { invoke } = await import('@tauri-apps/api/core')
+        await invoke('open_external', { url: targetUrl })
+      } catch {
+        window.open(targetUrl, '_blank', 'noopener')
+      }
+    })
 
     const closeBtn = document.createElement('button')
     closeBtn.type = 'button'
@@ -683,7 +705,7 @@ function mountWelcomeAndBrowserInEditor(): void {
     closeBtn.innerHTML = zenIcon('close', 15)
     closeBtn.addEventListener('click', () => void toggleZenPanel('browser'))
 
-    addr.append(backBtn, fwdBtn, reloadBtn, urlInput, closeBtn)
+    addr.append(backBtn, fwdBtn, reloadBtn, urlInput, extBtn, closeBtn)
 
     const stage = document.createElement('div')
     stage.className = 'hanzo-zen-browser-stage'
@@ -691,10 +713,23 @@ function mountWelcomeAndBrowserInEditor(): void {
     const empty = document.createElement('div')
     empty.className = 'hanzo-zen-browser-empty'
     const emptyInner = document.createElement('div')
+    emptyInner.className = 'hanzo-zen-browser-empty-inner'
     const previewLabel = document.createElement('p')
-    previewLabel.textContent = 'Local application preview · Enter a running dev server URL above'
-    emptyInner.innerHTML = `${renderHanzoMarkSvg(43)}<h1>Build what’s next.</h1>`
+    previewLabel.textContent = 'Local application preview · Enter a dev server URL or pick a port below'
+    emptyInner.innerHTML = `${renderHanzoMarkSvg(32)}<h1>Build what’s next.</h1>`
     emptyInner.appendChild(previewLabel)
+
+    const portBar = document.createElement('div')
+    portBar.className = 'hanzo-zen-browser-ports'
+    for (const port of [3000, 5173, 8080, 4321]) {
+      const chip = document.createElement('button')
+      chip.type = 'button'
+      chip.className = 'hanzo-zen-browser-port'
+      chip.textContent = `localhost:${port}`
+      chip.addEventListener('click', () => navigateTo(`http://localhost:${port}`))
+      portBar.appendChild(chip)
+    }
+    emptyInner.appendChild(portBar)
     empty.appendChild(emptyInner)
 
     const iframe = document.createElement('iframe')
@@ -702,24 +737,59 @@ function mountWelcomeAndBrowserInEditor(): void {
     iframe.title = 'Workspace Browser Preview'
     iframe.hidden = true
 
+    const probePort = async (url: string): Promise<boolean> => {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), 600)
+      try {
+        await fetch(url, { mode: 'no-cors', signal: ctrl.signal })
+        return true
+      } catch {
+        return false
+      } finally {
+        clearTimeout(timer)
+      }
+    }
+
     const navigateTo = (rawUrl: string) => {
-      const normalized = /^https?:\/\//i.test(rawUrl.trim())
-        ? rawUrl.trim()
-        : `http://${rawUrl.trim()}`
+      const trimmed = rawUrl.trim() || 'http://localhost:3000'
+      const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`
       urlInput.value = normalized
+      try {
+        localStorage.setItem('hanzo.ide.browserUrl', normalized)
+      } catch {
+        /* ignore */
+      }
       previewLabel.textContent = `${normalized} · Connecting…`
-      fetch(normalized, { mode: 'no-cors' })
-        .then(() => {
+      void probePort(normalized).then((ok) => {
+        if (ok) {
           empty.hidden = true
           iframe.hidden = false
-          iframe.src = normalized
-        })
-        .catch(() => {
+          if (iframe.src !== normalized) iframe.src = normalized
+        } else {
           iframe.hidden = true
           empty.hidden = false
           previewLabel.textContent = `${normalized} · Waiting for local dev server`
-        })
+        }
+      })
     }
+
+    let autoProbed = false
+    browserEl.addEventListener('hanzo:browser-opened', async () => {
+      if (autoProbed && empty.hidden) return
+      autoProbed = true
+      const cur = urlInput.value.trim() || 'http://localhost:3000'
+      if (await probePort(cur)) {
+        navigateTo(cur)
+        return
+      }
+      for (const port of [3000, 5173, 8080, 4321]) {
+        const candidate = `http://localhost:${port}`
+        if (candidate !== cur && (await probePort(candidate))) {
+          navigateTo(candidate)
+          return
+        }
+      }
+    })
 
     urlInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') navigateTo(urlInput.value)

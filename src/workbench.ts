@@ -162,6 +162,8 @@ function setLoadingStatus(msg: string) {
 export async function initializeWorkbench(): Promise<void> {
   const initialThemeId = readStoredThemeId()
   applyDocumentAppearance(initialThemeId)
+  const { applyHanzoDevLayoutSettings, loadHanzoDevLayoutSettings } = await import('./hanzo/settings-layout.ts')
+  applyHanzoDevLayoutSettings(loadHanzoDevLayoutSettings())
   // Mount `#hanzo-zen-toolbar` (40px flex child) BEFORE Monaco measures `#workbench-shell`
   const { mountWorkbenchShellChrome } = await import('./hanzo/account.ts')
   mountWorkbenchShellChrome()

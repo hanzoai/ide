@@ -151,7 +151,7 @@ body {
 
 a:focus-visible,
 button:focus-visible,
-input:not(.hanzo-whisper-input):focus-visible,
+input:not(.hanzo-whisper-input):not(.hanzo-zen-browser-url):focus-visible,
 textarea:not(.hanzo-chat-textarea):focus-visible,
 select:focus-visible,
 [role='button']:focus-visible,
@@ -297,13 +297,23 @@ html:not([data-zen-traditional-activitybar='true']) .monaco-workbench .part.side
   display: none !important;
 }
 
-/* Zed-style distraction-free single-file / scratch mode: hide single-tab strip & scratch breadcrumbs */
+/* Zed-style distraction-free single-file / scratch mode & integrated browser overlay:
+   hide underlying tab strip / breadcrumbs so active editor tabs never bleed through `#hanzo-zen-browser` */
 html[data-zen-single-tab='true'] .monaco-workbench .part.editor .tabs-and-actions-container,
 html[data-zen-scratch='true'] .monaco-workbench .breadcrumbs-below-tabs,
 html[data-zen-scratch='true'] .monaco-workbench .breadcrumbs-control {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
+}
+
+html[data-zen-browser='true'] .monaco-workbench .part.editor > .content {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.monaco-workbench .part.editor {
+  overflow: hidden !important;
 }
 
 .monaco-workbench .part.editor > .content .editor-group-container > .title {

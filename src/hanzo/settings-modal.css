@@ -84,6 +84,54 @@
   overflow-y: auto;
 }
 
+.hz-settings-nav-group {
+  margin: 10px 6px 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6e6e77;
+}
+
+.hz-settings-nav-group:first-child {
+  margin-top: 2px;
+}
+
+.hz-settings-slider-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.hz-settings-slider-out {
+  min-width: 48px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #16161b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--hanzo-font-mono);
+  font-size: 11px;
+  text-align: center;
+  color: #e4e4e7;
+}
+
+.hz-settings-slider {
+  width: 124px;
+  accent-color: #fafafa;
+  cursor: pointer;
+}
+
+[data-hanzo-theme='light'] .hz-settings-slider-out {
+  background: #ffffff;
+  border-color: #e4e4e7;
+  color: #18181b;
+}
+
+[data-hanzo-theme='light'] .hz-settings-slider {
+  accent-color: #18181b;
+}
+
 .hz-settings-nav-btn {
   width: 100%;
   height: 34px;

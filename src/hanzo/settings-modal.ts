@@ -1,22 +1,20 @@
 // Shared Hanzo Dev-Style Grouped Settings Modal (`openHanzoSettingsModal`).
 //
-// Sections:
-//   - General
-//   - Account & Billing (unified IAM + Balance + Monthly Spend + Token Usage + Hanzo Pay)
-//   - Appearance
-//   - Models & Providers
-//   - Local AI & Node (`hanzo-engine`, `hanzo-router`, `hanzod`, `Ollama`)
-//   - Blockchain Console (`hanzo-chain` HIP-1330 Mainnet/Testnet/Devnet/Local RPC)
-//   - MCP & Connections
-//   - Editor & Workbench ("Open JSON / VS Code Settings" for power users)
-//   - Keybindings
-//   - About
+// Full parity with `Hanzo Dev` (`SettingsSidebarNav.tsx` + `AppearanceSettingsPanel.tsx`):
+//   - Preferences: General, Appearance (Theme Library, Contrast, Glass Opacity, Chat Width,
+//     Effort Display, Render Math, Panel Animations, Sidebar Layout, Typography, Dock Icon),
+//     Chat, Diffs & PRs, Keybindings
+//   - Agents: Providers (`enso` default), Account & Usage, Browser, Devices, Scheduled tasks
+//   - Code: Editor & Workbench, Source control & Worktrees
+//   - Connections: MCP & Connections, Local AI & Node, Blockchain Console
+//   - More: About
 
 import './settings-modal.css'
 import { invoke } from '@tauri-apps/api/core'
 import { emit, tauri } from './tauri.ts'
 import {
   HANZO_DEFAULT_KEYBINDINGS,
+  HANZO_DEFAULT_MODEL,
   detectDesktopPlatform,
   isMacDesktopPlatform,
   readStoredAppearance,
@@ -26,32 +24,57 @@ import { getWorkspace } from './ide-context.ts'
 import { PROVIDER_DEFS, probeAndAutoSeedProviders } from './chat/settings.ts'
 import { S } from './chat/state.ts'
 import { loadPrefs, savePrefs } from './chat/prefs.ts'
+import {
+  DEFAULT_HANZO_DEV_LAYOUT,
+  loadHanzoDevLayoutSettings,
+  saveAndApplyHanzoDevLayoutSettings,
+  type HanzoChatWidth,
+  type HanzoEffortDisplay,
+} from './settings-layout.ts'
 import { renderAccountAndBillingSection } from './settings-billing.ts'
 import { renderBlockchainConsoleSection, renderLocalNodeSection } from './settings-node.ts'
 
 export type HanzoSettingsSectionId =
   | 'general'
-  | 'account'
   | 'appearance'
+  | 'chat'
+  | 'diffs'
+  | 'keybindings'
   | 'models'
+  | 'account'
+  | 'browser'
+  | 'devices'
+  | 'editor'
+  | 'worktrees'
+  | 'mcp'
   | 'local-node'
   | 'blockchain'
-  | 'mcp'
-  | 'editor'
-  | 'keybindings'
   | 'about'
 
-const NAV_ITEMS: Array<{ id: HanzoSettingsSectionId; label: string; icon: string; keywords: string }> = [
-  { id: 'general', label: 'General', icon: 'codicon-sliders', keywords: 'approval plan folder startup' },
-  { id: 'account', label: 'Account & Billing', icon: 'codicon-account', keywords: 'iam login sign in org usage credits billing pay hanzo.id' },
-  { id: 'appearance', label: 'Appearance', icon: 'codicon-color-mode', keywords: 'theme dark light dock icon font' },
-  { id: 'models', label: 'Models & Providers', icon: 'codicon-sparkle', keywords: 'zen ollama openai anthropic api key' },
-  { id: 'local-node', label: 'Local AI & Node', icon: 'codicon-server-process', keywords: 'local models node hanzod router engine private offline inference' },
-  { id: 'blockchain', label: 'Blockchain Console', icon: 'codicon-globe', keywords: 'chain rpc hip-1330 mainnet testnet devnet block height peers explorer' },
-  { id: 'mcp', label: 'MCP & Connections', icon: 'codicon-plug', keywords: 'mcp zap server tools local bus' },
-  { id: 'editor', label: 'Editor & Workbench', icon: 'codicon-code', keywords: 'vscode json settings font tab minimap' },
-  { id: 'keybindings', label: 'Keybindings', icon: 'codicon-keyboard', keywords: 'shortcuts command palette sidebar' },
-  { id: 'about', label: 'About', icon: 'codicon-info', keywords: 'version platform engine docs' },
+interface NavItem {
+  id: HanzoSettingsSectionId
+  group: string
+  label: string
+  icon: string
+  keywords: string
+}
+
+const NAV_ITEMS: readonly NavItem[] = [
+  { id: 'general', group: 'Preferences', label: 'General', icon: 'codicon-sliders', keywords: 'approval plan folder startup enso' },
+  { id: 'appearance', group: 'Preferences', label: 'Appearance', icon: 'codicon-color-mode', keywords: 'theme zen clay light contrast opacity glass chat width effort math animations typography font dock icon' },
+  { id: 'chat', group: 'Preferences', label: 'Chat', icon: 'codicon-comment-discussion', keywords: 'composer context effort thinking stream' },
+  { id: 'diffs', group: 'Preferences', label: 'Diffs & pull requests', icon: 'codicon-diff', keywords: 'diff split inline wrap pull request git' },
+  { id: 'keybindings', group: 'Preferences', label: 'Keybindings', icon: 'codicon-keyboard', keywords: 'shortcuts command palette sidebar terminal' },
+  { id: 'models', group: 'Agents', label: 'Providers', icon: 'codicon-sparkle', keywords: 'enso zen6 ollama openai anthropic api key models' },
+  { id: 'account', group: 'Agents', label: 'Usage & Account', icon: 'codicon-account', keywords: 'iam login sign in org usage credits billing pay hanzo.id' },
+  { id: 'browser', group: 'Agents', label: 'Browser', icon: 'codicon-browser', keywords: 'preview localhost port playwright browser' },
+  { id: 'devices', group: 'Agents', label: 'Devices', icon: 'codicon-device-mobile', keywords: 'phone ios android mobile qr paired' },
+  { id: 'editor', group: 'Code', label: 'Editor & Projects', icon: 'codicon-code', keywords: 'vscode json settings font tab minimap formatter' },
+  { id: 'worktrees', group: 'Code', label: 'Source control & Worktrees', icon: 'codicon-git-branch', keywords: 'git branch prefix worktree checkout commit' },
+  { id: 'mcp', group: 'Connections', label: 'MCP & Connections', icon: 'codicon-plug', keywords: 'mcp hip-0300 zap server tools local bus' },
+  { id: 'local-node', group: 'Connections', label: 'Environments & Local AI', icon: 'codicon-server-process', keywords: 'local models node hanzod router engine private offline inference' },
+  { id: 'blockchain', group: 'Connections', label: 'Blockchain Console', icon: 'codicon-globe', keywords: 'chain rpc hip-1330 mainnet testnet devnet block height peers explorer' },
+  { id: 'about', group: 'More', label: 'About', icon: 'codicon-info', keywords: 'version platform engine docs license' },
 ]
 
 async function runVsCodeCommand(commandId: string): Promise<void> {
@@ -83,6 +106,37 @@ function makeRow(titleText: string, descText: string, control?: HTMLElement): HT
   return row
 }
 
+function makeSliderControl(
+  value: number,
+  min: number,
+  max: number,
+  step: number,
+  unit: string,
+  ariaLabel: string,
+  onChange: (next: number) => void,
+): HTMLDivElement {
+  const wrap = document.createElement('div')
+  wrap.className = 'hz-settings-slider-wrap'
+  const out = document.createElement('output')
+  out.className = 'hz-settings-slider-out'
+  out.textContent = `${value}${unit}`
+  const slider = document.createElement('input')
+  slider.type = 'range'
+  slider.className = 'hz-settings-slider'
+  slider.min = String(min)
+  slider.max = String(max)
+  slider.step = String(step)
+  slider.value = String(value)
+  slider.setAttribute('aria-label', ariaLabel)
+  slider.addEventListener('input', () => {
+    const v = Number(slider.value)
+    out.textContent = `${v}${unit}`
+    onChange(v)
+  })
+  wrap.append(out, slider)
+  return wrap
+}
+
 export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 'general'): void {
   const existing = document.getElementById('hz-settings-backdrop')
   if (existing) existing.remove()
@@ -100,7 +154,10 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
   shell.setAttribute('aria-modal', 'true')
   shell.setAttribute('aria-label', 'Hanzo IDE Settings')
 
-  const close = () => backdrop.remove()
+  const close = () => {
+    window.removeEventListener('keydown', onKey)
+    backdrop.remove()
+  }
 
   const sidebar = document.createElement('aside')
   sidebar.className = 'hz-settings-sidebar'
@@ -112,7 +169,7 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
   const searchInput = document.createElement('input')
   searchInput.type = 'search'
   searchInput.className = 'hz-settings-search'
-  searchInput.placeholder = 'Search settings…'
+  searchInput.placeholder = 'Search settings… (/)'
 
   const nav = document.createElement('nav')
   nav.className = 'hz-settings-nav'
@@ -154,8 +211,18 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
   const renderNav = () => {
     nav.innerHTML = ''
     const q = filterQuery.trim().toLowerCase()
-    for (const item of NAV_ITEMS) {
-      if (q && !`${item.label} ${item.keywords}`.toLowerCase().includes(q)) continue
+    const visible = NAV_ITEMS.filter(
+      (item) => !q || `${item.label} ${item.group} ${item.keywords}`.toLowerCase().includes(q),
+    )
+    let lastGroup = ''
+    for (const item of visible) {
+      if (item.group !== lastGroup) {
+        lastGroup = item.group
+        const g = document.createElement('div')
+        g.className = 'hz-settings-nav-group'
+        g.textContent = item.group
+        nav.appendChild(g)
+      }
       const btn = document.createElement('button')
       btn.type = 'button'
       btn.className = 'hz-settings-nav-btn'
@@ -173,7 +240,7 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
   searchInput.addEventListener('input', () => {
     filterQuery = searchInput.value
     const q = filterQuery.trim().toLowerCase()
-    const match = NAV_ITEMS.find((n) => `${n.label} ${n.keywords}`.toLowerCase().includes(q))
+    const match = NAV_ITEMS.find((n) => `${n.label} ${n.group} ${n.keywords}`.toLowerCase().includes(q))
     if (q && match && match.id !== activeSection) {
       activeSection = match.id
     }
@@ -254,33 +321,23 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
         close()
         void runVsCodeCommand('hanzo.openFolder')
       })
-      card.appendChild(
-        makeRow('Project folder', getWorkspace() || 'No folder open', openWsBtn),
-      )
-
-      const phoneBtn = document.createElement('button')
-      phoneBtn.type = 'button'
-      phoneBtn.className = 'hz-settings-btn'
-      phoneBtn.textContent = 'Get Hanzo on your phone'
-      phoneBtn.addEventListener('click', () => {
-        void import('./phone-app-modal.ts').then((m) => m.openPhoneAppModal())
-      })
-      card.appendChild(
-        makeRow(
-          'Get Hanzo on your phone',
-          'Scan to download Hanzo on iOS or Android and sign in with the same account.',
-          phoneBtn,
-        ),
-      )
+      card.appendChild(makeRow('Project folder', getWorkspace() || 'No folder open', openWsBtn))
 
       body.appendChild(card)
       return
     }
 
     if (activeSection === 'appearance') {
-      const card = document.createElement('div')
-      card.className = 'hz-settings-card'
+      const layout = loadHanzoDevLayoutSettings()
       const curThemeId = document.documentElement.dataset.hanzoThemeId || readStoredAppearance()
+      const traditionalAb = localStorage.getItem('hanzo.ide.traditionalActivityBar') === 'true'
+
+      const themeTitle = document.createElement('div')
+      themeTitle.className = 'hz-settings-group-title'
+      themeTitle.textContent = 'Colors & themes'
+
+      const themeCard = document.createElement('div')
+      themeCard.className = 'hz-settings-card'
 
       const themeSeg = document.createElement('div')
       themeSeg.className = 'hz-settings-seg'
@@ -302,34 +359,345 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
         })
         themeSeg.appendChild(b)
       }
-      card.appendChild(
+      themeCard.appendChild(
         makeRow(
-          'Color theme',
+          'Theme library',
           'Zen (#000000 / #090909), Clay (#141418 / #111016), or Zen Light (#ffffff).',
           themeSeg,
         ),
       )
 
-      if (tauri() && isMacDesktopPlatform()) {
-        const curDock: DockIconMode = await getDockIconMode().catch(() => 'branded')
-        const dockSeg = document.createElement('div')
-        dockSeg.className = 'hz-settings-seg'
-        for (const dm of ['branded', 'minimal'] as const) {
-          const b = document.createElement('button')
-          b.type = 'button'
-          b.textContent = dm === 'branded' ? 'Branded' : 'Minimal'
-          b.setAttribute('aria-pressed', String(curDock === dm))
-          b.addEventListener('click', async () => {
-            await setDockIconMode(dm).catch(() => {})
-            void renderBody()
-          })
-          dockSeg.appendChild(b)
-        }
-        card.appendChild(
-          makeRow('macOS Dock icon', 'Branded corner H badge or minimal squircle.', dockSeg),
-        )
-      }
+      const ifaceTitle = document.createElement('div')
+      ifaceTitle.className = 'hz-settings-group-title'
+      ifaceTitle.textContent = 'Interface & Layout (Hanzo Dev)'
 
+      const ifaceCard = document.createElement('div')
+      ifaceCard.className = 'hz-settings-card'
+
+      ifaceCard.appendChild(
+        makeRow(
+          'Contrast',
+          'Adjust the contrast of colors and borders across the interface.',
+          makeSliderControl(layout.appearanceContrast, 75, 125, 5, '%', 'Contrast', (v) => {
+            void saveAndApplyHanzoDevLayoutSettings({ appearanceContrast: v })
+          }),
+        ),
+      )
+
+      ifaceCard.appendChild(
+        makeRow(
+          'Surface opacity',
+          'Higher values make menus, dialogs, and the composer more solid.',
+          makeSliderControl(layout.glassOpacity, 70, 100, 5, '%', 'Surface opacity', (v) => {
+            void saveAndApplyHanzoDevLayoutSettings({ glassOpacity: v })
+          }),
+        ),
+      )
+
+      const widthSeg = document.createElement('div')
+      widthSeg.className = 'hz-settings-seg'
+      for (const w of [
+        { id: 'comfortable', label: 'Comfortable' },
+        { id: 'wide', label: 'Wide' },
+        { id: 'full', label: 'Full' },
+      ] as const) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = w.label
+        b.setAttribute('aria-pressed', String(layout.chatWidth === w.id))
+        b.addEventListener('click', async () => {
+          await saveAndApplyHanzoDevLayoutSettings({ chatWidth: w.id as HanzoChatWidth })
+          void renderBody()
+        })
+        widthSeg.appendChild(b)
+      }
+      ifaceCard.appendChild(
+        makeRow(
+          'Chat & panel width',
+          'Set how wide messages and the composer grow in the AI dock and detached chat.',
+          widthSeg,
+        ),
+      )
+
+      const barSeg = document.createElement('div')
+      barSeg.className = 'hz-settings-seg'
+      for (const mode of [
+        { id: false, label: 'Minimal Zen' },
+        { id: true, label: 'Activity Bar' },
+      ] as const) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = mode.label
+        b.setAttribute('aria-pressed', String(traditionalAb === mode.id))
+        b.addEventListener('click', async () => {
+          const { toggleTraditionalActivityBar } = await import('./zen-workspace.ts')
+          if (traditionalAb !== mode.id) await toggleTraditionalActivityBar()
+          void renderBody()
+        })
+        barSeg.appendChild(b)
+      }
+      ifaceCard.appendChild(
+        makeRow(
+          'Sidebar layout',
+          'Distraction-free Zed-style switcher or traditional VS Code left Activity Bar.',
+          barSeg,
+        ),
+      )
+
+      ifaceCard.appendChild(
+        makeRow(
+          'Panel animation speed',
+          'Set how fast sidebars and panels open and close.',
+          makeSliderControl(layout.panelAnimationDurationMs, 0, 250, 25, 'ms', 'Panel animations', (v) => {
+            void saveAndApplyHanzoDevLayoutSettings({ panelAnimationDurationMs: v })
+          }),
+        ),
+      )
+
+      const curDock: DockIconMode = tauri()
+        ? await getDockIconMode().catch(() => 'branded')
+        : 'branded'
+      const dockSeg = document.createElement('div')
+      dockSeg.className = 'hz-settings-seg'
+      for (const dm of ['branded', 'minimal'] as const) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = dm === 'branded' ? 'Branded' : 'Minimal'
+        b.setAttribute('aria-pressed', String(curDock === dm))
+        b.addEventListener('click', async () => {
+          if (tauri()) await setDockIconMode(dm).catch(() => {})
+          void renderBody()
+        })
+        dockSeg.appendChild(b)
+      }
+      ifaceCard.appendChild(
+        makeRow('Dock icon', 'Branded corner badge or minimal monochrome squircle.', dockSeg),
+      )
+
+      const typoTitle = document.createElement('div')
+      typoTitle.className = 'hz-settings-group-title'
+      typoTitle.textContent = 'Typography'
+
+      const typoCard = document.createElement('div')
+      typoCard.className = 'hz-settings-card'
+      typoCard.appendChild(
+        makeRow(
+          'Editor font size (Zen Mono)',
+          'Adjust Monaco editor and integrated terminal font size.',
+          makeSliderControl(layout.editorFontSize, 12, 16, 1, 'px', 'Editor font size', (v) => {
+            void saveAndApplyHanzoDevLayoutSettings({ editorFontSize: v })
+          }),
+        ),
+      )
+      typoCard.appendChild(
+        makeRow(
+          'Interface font size (Zen)',
+          'Adjust sidebar, chat, and menu typography scale.',
+          makeSliderControl(layout.uiFontSize, 12, 15, 1, 'px', 'UI font size', (v) => {
+            void saveAndApplyHanzoDevLayoutSettings({ uiFontSize: v })
+          }),
+        ),
+      )
+
+      const resetBtn = document.createElement('button')
+      resetBtn.type = 'button'
+      resetBtn.className = 'hz-settings-btn'
+      resetBtn.textContent = 'Reset Appearance Defaults'
+      resetBtn.addEventListener('click', async () => {
+        await saveAndApplyHanzoDevLayoutSettings(DEFAULT_HANZO_DEV_LAYOUT)
+        void renderBody()
+      })
+      typoCard.appendChild(
+        makeRow('Reset interface', 'Restore all Hanzo Dev layout and typography defaults.', resetBtn),
+      )
+
+      body.append(themeTitle, themeCard, ifaceTitle, ifaceCard, typoTitle, typoCard)
+      return
+    }
+
+    if (activeSection === 'chat') {
+      const layout = loadHanzoDevLayoutSettings()
+      const card = document.createElement('div')
+      card.className = 'hz-settings-card'
+
+      const effortSeg = document.createElement('div')
+      effortSeg.className = 'hz-settings-seg'
+      for (const opt of [
+        { id: 'label', label: 'Word' },
+        { id: 'bars', label: 'Bars' },
+      ] as const) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = opt.label
+        b.setAttribute('aria-pressed', String(layout.effortDisplay === opt.id))
+        b.addEventListener('click', async () => {
+          await saveAndApplyHanzoDevLayoutSettings({ effortDisplay: opt.id as HanzoEffortDisplay })
+          void renderBody()
+        })
+        effortSeg.appendChild(b)
+      }
+      card.appendChild(
+        makeRow(
+          'Effort display',
+          'Show reasoning effort in the composer as its name (Fast / High) or as bars.',
+          effortSeg,
+        ),
+      )
+
+      const mathSeg = document.createElement('div')
+      mathSeg.className = 'hz-settings-seg'
+      for (const on of [true, false]) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = on ? 'Enabled' : 'Off'
+        b.setAttribute('aria-pressed', String(layout.mathRenderingEnabled === on))
+        b.addEventListener('click', async () => {
+          await saveAndApplyHanzoDevLayoutSettings({ mathRenderingEnabled: on })
+          void renderBody()
+        })
+        mathSeg.appendChild(b)
+      }
+      card.appendChild(
+        makeRow('Render math', 'Typeset LaTeX math expressions in messages and Markdown previews.', mathSeg),
+      )
+
+      const ctxSeg = document.createElement('div')
+      ctxSeg.className = 'hz-settings-seg'
+      for (const on of [true, false]) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = on ? 'Visible' : 'Auto-hide'
+        b.setAttribute('aria-pressed', String(layout.persistComposerContextStrip === on))
+        b.addEventListener('click', async () => {
+          await saveAndApplyHanzoDevLayoutSettings({ persistComposerContextStrip: on })
+          void renderBody()
+        })
+        ctxSeg.appendChild(b)
+      }
+      card.appendChild(
+        makeRow(
+          'Composer context strip',
+          'Keep active file, branch, and worktree pills visible above the composer.',
+          ctxSeg,
+        ),
+      )
+
+      body.appendChild(card)
+      return
+    }
+
+    if (activeSection === 'diffs') {
+      const card = document.createElement('div')
+      card.className = 'hz-settings-card'
+
+      const sideBtn = document.createElement('button')
+      sideBtn.type = 'button'
+      sideBtn.className = 'hz-settings-btn'
+      sideBtn.textContent = 'Toggle Inline / Split Diff'
+      sideBtn.addEventListener('click', () => {
+        void runVsCodeCommand('toggle.diff.renderSideBySide')
+      })
+      card.appendChild(
+        makeRow(
+          'Diff presentation',
+          'Switch between side-by-side split diffs and unified inline diffs.',
+          sideBtn,
+        ),
+      )
+      body.appendChild(card)
+      return
+    }
+
+    if (activeSection === 'browser') {
+      const layout = loadHanzoDevLayoutSettings()
+      const card = document.createElement('div')
+      card.className = 'hz-settings-card'
+
+      const portSeg = document.createElement('div')
+      portSeg.className = 'hz-settings-seg'
+      for (const p of [3000, 5173, 8080, 4321]) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = `:${p}`
+        b.setAttribute('aria-pressed', String(layout.browserDefaultPort === p))
+        b.addEventListener('click', async () => {
+          await saveAndApplyHanzoDevLayoutSettings({ browserDefaultPort: p })
+          void renderBody()
+        })
+        portSeg.appendChild(b)
+      }
+      card.appendChild(
+        makeRow(
+          'Default preview port',
+          'Initial localhost port probed when opening the Integrated Browser.',
+          portSeg,
+        ),
+      )
+
+      const openBrowserBtn = document.createElement('button')
+      openBrowserBtn.type = 'button'
+      openBrowserBtn.className = 'hz-settings-btn hz-settings-btn--primary'
+      openBrowserBtn.textContent = 'Open Integrated Browser'
+      openBrowserBtn.addEventListener('click', () => {
+        close()
+        void import('./zen-workspace.ts').then((m) => m.toggleZenPanel('browser'))
+      })
+      card.appendChild(
+        makeRow('Workspace Browser Preview', 'Toggle the live localhost preview pane inside the editor.', openBrowserBtn),
+      )
+
+      body.appendChild(card)
+      return
+    }
+
+    if (activeSection === 'devices') {
+      const card = document.createElement('div')
+      card.className = 'hz-settings-card'
+      const phoneBtn = document.createElement('button')
+      phoneBtn.type = 'button'
+      phoneBtn.className = 'hz-settings-btn hz-settings-btn--primary'
+      phoneBtn.textContent = 'Get Hanzo on your phone'
+      phoneBtn.addEventListener('click', () => {
+        void import('./phone-app-modal.ts').then((m) => m.openPhoneAppModal())
+      })
+      card.appendChild(
+        makeRow(
+          'Get Hanzo on your phone',
+          'Download Hanzo on iOS or Android (hanzo.ai/download#mobile) and sync threads with your desktop.',
+          phoneBtn,
+        ),
+      )
+      body.appendChild(card)
+      return
+    }
+
+    if (activeSection === 'worktrees') {
+      const layout = loadHanzoDevLayoutSettings()
+      const card = document.createElement('div')
+      card.className = 'hz-settings-card'
+
+      const prefixSeg = document.createElement('div')
+      prefixSeg.className = 'hz-settings-seg'
+      for (const pfx of ['feat/', 'fix/', 'dev/', 'hanzo/']) {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = pfx
+        b.setAttribute('aria-pressed', String(layout.branchPrefix === pfx))
+        b.addEventListener('click', async () => {
+          await saveAndApplyHanzoDevLayoutSettings({ branchPrefix: pfx })
+          void renderBody()
+        })
+        prefixSeg.appendChild(b)
+      }
+      card.appendChild(
+        makeRow('Agent branch naming prefix', 'Prefix used when agents create feature branches.', prefixSeg),
+      )
+      card.appendChild(
+        makeRow(
+          'Worktree directory',
+          `Isolated parallel agent worktrees are stored under ${layout.worktreeDirectory}.`,
+        ),
+      )
       body.appendChild(card)
       return
     }
@@ -355,7 +723,7 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
       detectCard.appendChild(
         makeRow(
           'Model routing',
-          `Active default: ${config?.default_model || 'enso'} (${config?.default_provider || 'hanzo'})`,
+          `Active default: ${config?.default_model || HANZO_DEFAULT_MODEL} (${config?.default_provider || 'hanzo'})`,
           detectBtn,
         ),
       )
@@ -396,7 +764,7 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
         const modelInp = document.createElement('input')
         modelInp.type = 'text'
         modelInp.className = 'hz-settings-input'
-        modelInp.placeholder = 'Default model ID (e.g. enso)'
+        modelInp.placeholder = `Default model ID (e.g. ${HANZO_DEFAULT_MODEL})`
         modelInp.value = saved?.default_model || selectedDef.models[0] || ''
 
         const presetRow = document.createElement('div')
@@ -425,7 +793,7 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
         saveBtn.className = 'hz-settings-btn hz-settings-btn--primary'
         saveBtn.textContent = 'Save & Set Default'
         saveBtn.addEventListener('click', async () => {
-          const model = modelInp.value.trim() || selectedDef.models[0] || 'enso'
+          const model = modelInp.value.trim() || selectedDef.models[0] || HANZO_DEFAULT_MODEL
           saveBtn.textContent = 'Saving…'
           try {
             const enabled = Array.from(new Set([...selectedDef.models, model]))
@@ -445,6 +813,8 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
               config: { ...latest, default_provider: selectedDef.id, default_model: model },
             })
             S.selectedModel = model
+            const prefs = loadPrefs()
+            savePrefs({ ...prefs, selectedModel: model })
             S.needsProviderSetup = false
             await emit('provider-updated').catch(() => {})
             statusMsg.textContent = `Saved ${selectedDef.label} (${model})`
@@ -623,7 +993,11 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
       else window.open('https://github.com/hanzoai/ide', '_blank', 'noopener')
     })
     card.appendChild(
-      makeRow('Hanzo IDE v0.1.2', `Platform: ${detectDesktopPlatform()} · AI-native Rust + Tauri IDE`, docsBtn),
+      makeRow(
+        'Hanzo IDE v0.2.0',
+        `Platform: ${detectDesktopPlatform()} · Monaco VS Code 28.4 · Tauri 2.12 · HIP-0300 MCP`,
+        docsBtn,
+      ),
     )
     body.appendChild(card)
   }
@@ -634,8 +1008,20 @@ export function openHanzoSettingsModal(initialSection: HanzoSettingsSectionId = 
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      window.removeEventListener('keydown', onKey)
       close()
+      return
+    }
+    if (
+      e.key === '/' &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      document.activeElement?.tagName !== 'INPUT' &&
+      document.activeElement?.tagName !== 'TEXTAREA'
+    ) {
+      e.preventDefault()
+      searchInput.focus()
+      searchInput.select()
     }
   }
   window.addEventListener('keydown', onKey)

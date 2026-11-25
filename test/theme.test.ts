@@ -1,3 +1,4 @@
+import { DEFAULT_HANZO_DEV_LAYOUT, loadHanzoDevLayoutSettings } from '../src/hanzo/settings-layout.ts'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
@@ -279,4 +280,20 @@ test('IAM config, Sign-In SVG, and Get Hanzo on your phone match Hanzo Dev & Des
   assert.ok(signInTs.includes('Sign in to Hanzo IDE'))
   assert.ok(signInTs.includes('Continue without signing in'))
   assert.ok(signInTs.includes('M23.745 12.27'), 'must use exact canonical @hanzo/ui Google SVG')
+})
+
+test('Unified Hanzo Dev layout defaults and kebab-case settings codicons', () => {
+  const layout = loadHanzoDevLayoutSettings()
+  assert.deepEqual(layout, DEFAULT_HANZO_DEV_LAYOUT)
+  assert.equal(layout.chatWidth, 'comfortable')
+  assert.equal(layout.appearanceContrast, 100)
+  assert.equal(layout.glassOpacity, 100)
+  assert.equal(layout.browserDefaultPort, 3000)
+
+  const modalTs = fs.readFileSync(path.join(rootDir, 'src/hanzo/settings-modal.ts'), 'utf8')
+  const icons = modalTs.match(/codicon-[a-zA-Z0-9-]+/g) ?? []
+  assert.ok(icons.length >= 10)
+  for (const icon of icons) {
+    assert.equal(icon, icon.toLowerCase(), `Codicon class must be lowercase kebab-case: ${icon}`)
+  }
 })

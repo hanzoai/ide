@@ -179,7 +179,8 @@ html[data-zen-traditional-activitybar='true'] .hanzo-zen-left-chrome {
 }
 
 .hanzo-zen-phead {
-  height: 37px;
+  height: 38px;
+  min-height: 38px;
   flex: none;
   padding: 0 9px 0 13px;
   display: flex;
@@ -253,10 +254,11 @@ html[data-zen-traditional-activitybar='true'] .hanzo-zen-left-chrome {
 .hanzo-zen-browser {
   position: absolute;
   inset: 0;
-  z-index: 9;
+  z-index: 35;
   display: flex;
   flex-direction: column;
-  background: var(--zen-panel, #0c0c0c);
+  overflow: hidden;
+  background: var(--zen-canvas, #090909);
 }
 
 .hanzo-zen-browser[hidden] {
@@ -264,30 +266,42 @@ html[data-zen-traditional-activitybar='true'] .hanzo-zen-left-chrome {
 }
 
 .hanzo-zen-browser-address {
+  height: 38px;
+  min-height: 38px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--zen-border, #222222);
+  padding: 0 8px;
+  border-bottom: 1px solid var(--zen-border-subtle, #1b1b1b);
   background: var(--zen-panel, #0c0c0c);
 }
 
-.hanzo-zen-browser-url {
+.hanzo-zen-browser-url,
+.hanzo-zen-browser-url:focus,
+.hanzo-zen-browser-url:focus-visible {
   flex: 1;
   min-width: 0;
   background: var(--zen-surface, #141414);
-  border: 1px solid var(--zen-border, #282828);
-  border-radius: 5px;
-  height: 27px;
-  padding: 0 9px;
+  border: 1px solid #262626;
+  border-radius: 6px;
+  height: 26px;
+  padding: 0 10px;
   color: var(--zen-fg, #d5d5d5);
   font-family: var(--hanzo-font-ui);
   font-size: 12px;
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .hanzo-zen-browser-url:focus {
-  border-color: var(--hanzo-border-focus, #3a3a3a);
+  border-color: #3a3a3a;
+}
+
+[data-hanzo-theme='light'] .hanzo-zen-browser-url {
+  background: #ffffff;
+  border-color: #e4e4e7;
+  color: #18181b;
 }
 
 .hanzo-zen-browser-stage {
@@ -296,33 +310,74 @@ html[data-zen-traditional-activitybar='true'] .hanzo-zen-left-chrome {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--zen-tabbar, #0b0b0b);
+  background: var(--zen-canvas, #090909);
 }
 
 .hanzo-zen-browser-empty {
   flex: 1;
+  min-height: 0;
   display: grid;
   place-items: center;
   text-align: center;
-  padding: 24px;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .hanzo-zen-browser-empty[hidden] {
   display: none !important;
 }
 
+.hanzo-zen-browser-empty-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #bbbbbb;
+}
+
 .hanzo-zen-browser-empty h1 {
-  font-size: 32px;
-  letter-spacing: -1.4px;
+  font-size: 18px;
+  letter-spacing: -0.02em;
   font-weight: 550;
   color: var(--zen-fg, #e5e5e5);
-  margin: 16px 0 6px;
+  margin: 14px 0 5px;
 }
 
 .hanzo-zen-browser-empty p {
   color: var(--zen-subtle, #888888);
-  font-size: 12.5px;
-  margin: 0;
+  font-size: 12px;
+  margin: 0 0 16px;
+}
+
+.hanzo-zen-browser-ports {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.hanzo-zen-browser-port {
+  height: 25px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #282828;
+  background: #121212;
+  color: #b5b5b5;
+  font-family: var(--hanzo-font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.hanzo-zen-browser-port:hover {
+  background: #1b1b1b;
+  border-color: #3a3a3a;
+  color: #f0f0f0;
+}
+
+[data-hanzo-theme='light'] .hanzo-zen-browser-port {
+  background: #f4f4f5;
+  border-color: #e4e4e7;
+  color: #3f3f46;
 }
 
 .hanzo-zen-browser-iframe {
