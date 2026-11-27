@@ -61,7 +61,7 @@ Hanzo is different:
 </p>
 
 <p align="center">
-  <img src="screenshots/memory.png" alt="Memory" width="900" /><br />
+  <img src="screenshots/memory-palace.png" alt="Memory" width="900" /><br />
   <em>Memory — visualize the agent's long-term memory graph, embedding atlas, and recall pipeline.</em>
 </p>
 
