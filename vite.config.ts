@@ -19,8 +19,8 @@ export default defineConfig({
       // is the detached-chat window's slim entry that mounts only the
       // chat panel (no Monaco, no workbench).
       input: {
-        main: resolve(__dirname, 'index.html'),
-        chat: resolve(__dirname, 'chat.html'),
+        main: resolve(import.meta.dirname, 'index.html'),
+        chat: resolve(import.meta.dirname, 'chat.html'),
       },
       output: {
         // Keep @codingame chunks manageable
@@ -116,7 +116,7 @@ export default defineConfig({
       // dev server's HTML fallback and the extension host got a page instead
       // of a worker. Listed first — earlier keys win.
       'monaco-editor/esm/vs/editor/editor.worker.js': resolve(
-        __dirname,
+        import.meta.dirname,
         'node_modules/@codingame/monaco-vscode-api/workers/editor.worker.js',
       ),
       path: 'path-browserify',
@@ -125,7 +125,7 @@ export default defineConfig({
       // `/@fs/@codingame/…`, which does not resolve — the dev server answered
       // those with index.html, so the extension-host iframe booted a second
       // copy of the workbench instead of loading a worker.
-      'monaco-editor': resolve(__dirname, 'node_modules/@codingame/monaco-vscode-api/monaco'),
+      'monaco-editor': resolve(import.meta.dirname, 'node_modules/@codingame/monaco-vscode-api/monaco'),
     },
     dedupe: ['@codingame/monaco-vscode-api'],
   },
