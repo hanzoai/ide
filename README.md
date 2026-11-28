@@ -314,16 +314,26 @@ Hanzo owns the engine end-to-end. The bridge layer (`hanzo-bridge`) connects the
 ## Getting Started
 
 ### Prerequisites
-- **Rust** 1.75+ with `cargo`
-- **Node.js** 18+ with `npm`
-- **Tauri CLI** — `cargo install tauri-cli`
+- **Rust** stable with `cargo`
+- **Node.js** 22.12+ with `npm`
+- **Tauri CLI** is installed locally by `npm ci`
+
+On Debian and Ubuntu, install the Linux dependencies used by the release workflow:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential clang libclang-dev \
+  cmake pkg-config curl wget file libxdo-dev libssl-dev \
+  libayatana-appindicator3-dev librsvg2-dev patchelf squashfs-tools xdg-utils
+```
 
 ### Build & Run
 
 ```bash
 git clone https://github.com/hanzoai/ide.git
-cd Hanzo
-npm install
+cd ide
+npm ci
+npm --prefix node-extension-host ci
 npm run tauri:dev
 ```
 
