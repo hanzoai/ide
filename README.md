@@ -1,4 +1,4 @@
-≠≠≠≠≠–––==-≠=<p align="center">
+<p align="center">
   <img src="public/wordmark.svg" alt="Hanzo" width="320" />
 </p>
 
@@ -15,14 +15,14 @@
   <a href="#screenshots">Screenshots</a> &bull;
   <a href="#engram---the-memory-system">Engram</a> &bull;
   <a href="#the-engine">The Engine</a> &bull;
-  <a href="#ast-indexing">AST Indexing</a> &bull;--
+  <a href="#ast-indexing">AST Indexing</a> &bull;
   <a href="#getting-started">Getting Started</a> &bull;
   <a href="#contributing">Contributing</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License" />
-  <img src="https://img.shields.io/badge/rust-1.75%2B-orange" alt="Rust" />
+  <img src="https://img.shields.io/badge/rust-1.96%2B-orange" alt="Rust" />
   <img src="https://img.shields.io/badge/tauri-2.x-blue" alt="Tauri" />
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-green" alt="Platform" />
 </p>
@@ -314,20 +314,36 @@ Hanzo owns the engine end-to-end. The bridge layer (`hanzo-bridge`) connects the
 ## Getting Started
 
 ### Prerequisites
-- **Rust** 1.75+ with `cargo`
-- **Node.js** 18+ with `npm`
-- **Tauri CLI** — `cargo install tauri-cli`
+- **Rust** 1.96+ with `cargo` (required by `grep-matcher`/`grep-regex`/`grep-searcher`)
+- **Node.js** 20+ with `npm`
+- **Tauri CLI** — bundled via `@tauri-apps/cli` in `devDependencies` (or `cargo install tauri-cli`)
+- **Platform native dependencies**:
+  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
+  - **Ubuntu / Debian**: `sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev clang libclang-dev`
+  - **Windows**: MSVC C++ Build Tools, Microsoft Edge WebView2 Runtime, and LLVM (`libclang.dll` with `LIBCLANG_PATH` set for `bindgen`)
 
 ### Build & Run
 
 ```bash
 git clone https://github.com/hanzoai/ide.git
-cd Hanzo
-npm install
+cd ide
+npm ci
+npm run build
+npm test
+cargo check --workspace --all-targets
+cargo test --workspace
 npm run tauri:dev
 ```
 
 First build compiles the Rust backend (~2-3 min). Subsequent launches are fast.
+
+### Profiling AST Indexing on Large Repositories
+
+Measure workspace scanning, tree-sitter AST symbol extraction, call/type graph construction, and AST chunking latency on any local repository:
+
+```bash
+cargo run --release -p hanzo-ai --example profile_workspace -- /path/to/workspace --iterations 3
+```
 
 ### Configure a Provider
 

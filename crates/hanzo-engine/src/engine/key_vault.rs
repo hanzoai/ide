@@ -28,7 +28,9 @@
 //   - Lock poison is recovered with a logged warning — a panicked thread
 //     should not permanently brick the vault for the rest of the app.
 
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
+#[cfg(not(test))]
+use log::error;
 use std::collections::HashMap;
 use std::sync::RwLock;
 use zeroize::Zeroizing;

@@ -104,11 +104,25 @@ pub fn classify_write_target(path: &str, workspace_root: Option<&str>) -> WriteT
 
     // Allowlisted system temp / cache paths — never gated.
     let lower = canon_str.to_lowercase();
-    let in_temp = lower.starts_with("/tmp/")
-        || lower.starts_with("/private/tmp/")
-        || lower.starts_with("/var/folders/")
-        || lower.starts_with("/private/var/folders/")
-        || lower.starts_with("/var/tmp/");
+    let has_parent_dir = candidate
+        .components()
+        .any(|c| matches!(c, std::path::Component::ParentDir));
+    let raw_norm = path.replace('\\', "/").to_lowercase();
+    let is_unix_temp = |s: &str| {
+        s.starts_with("/tmp/")
+            || s.starts_with("/private/tmp/")
+            || s.starts_with("/var/folders/")
+            || s.starts_with("/private/var/folders/")
+            || s.starts_with("/var/tmp/")
+    };
+    let in_native_temp = std::env::temp_dir()
+        .canonicalize()
+        .ok()
+        .map(|td| canon.as_ref().map(|c| c.starts_with(&td)).unwrap_or(false))
+        .unwrap_or(false);
+    let in_temp = is_unix_temp(&lower)
+        || (cfg!(windows) && !has_parent_dir && is_unix_temp(&raw_norm))
+        || in_native_temp;
     let in_engine_data = dirs::data_dir()
         .and_then(|d| d.canonicalize().ok())
         .map(|d| canon.as_ref().map(|c| c.starts_with(&d)).unwrap_or(false))

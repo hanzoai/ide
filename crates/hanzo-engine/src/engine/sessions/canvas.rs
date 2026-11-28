@@ -179,9 +179,7 @@ fn map_row(row: &rusqlite::Row) -> rusqlite::Result<CanvasComponentRow> {
 mod tests {
     use super::*;
     use crate::engine::sessions::schema_for_testing;
-    use parking_lot::Mutex;
     use rusqlite::Connection;
-    use std::sync::Arc;
 
     fn test_store() -> SessionStore {
         let conn = Connection::open_in_memory().unwrap();

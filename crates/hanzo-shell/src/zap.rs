@@ -135,9 +135,17 @@ mod tests {
 
     /// Tests run in one process and in parallel, so each needs its own socket.
     async fn peer(name: &str) -> (zapwire::transport::Server, std::sync::Arc<Conn>) {
-        let dir = std::env::temp_dir().join(format!("hanzo-zap-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let addr = dir.join(format!("{name}.sock")).to_string_lossy().to_string();
+        #[cfg(unix)]
+        let addr = {
+            let dir = std::env::temp_dir().join(format!("hanzo-zap-{}", std::process::id()));
+            std::fs::create_dir_all(&dir).unwrap();
+            dir.join(format!("{name}.sock")).to_string_lossy().to_string()
+        };
+        #[cfg(not(unix))]
+        let addr = {
+            let _ = name;
+            "127.0.0.1:0".to_string()
+        };
         let srv = zapwire::transport::Server::listen(&addr, |_c| {
             |env: &[u8]| {
                 let call = parse_request(env)?;
