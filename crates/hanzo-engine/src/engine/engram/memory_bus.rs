@@ -909,9 +909,7 @@ fn resolve_contradiction_with_trust(
 mod tests {
     use super::*;
     use crate::engine::sessions::schema_for_testing;
-    use parking_lot::Mutex;
     use rusqlite::Connection;
-    use std::sync::Arc;
 
     const TEST_PLATFORM_KEY: &[u8] = b"test-platform-key-for-hmac-256!!";
 

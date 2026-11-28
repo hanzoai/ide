@@ -2,7 +2,7 @@
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use crate::executor::{execute_js, execute_js_with_host, execute_js_with_host_streaming, LogCallback, SandboxResult};
+    use crate::executor::{execute_js, execute_js_with_host, execute_js_with_host_streaming, LogCallback};
     use crate::host_api::*;
     use std::sync::{Arc, Mutex};
 

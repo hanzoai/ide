@@ -186,16 +186,35 @@ mod tests {
 
     #[test]
     fn parses_file_with_line_and_column() {
-        let cwd = Path::new("/tmp");
-        let target = parse_cli_launch_target(["--no-sandbox", "notes/todo.rs:42:7"], cwd);
+        let cwd = std::env::temp_dir().join("hanzo-cli-target-nonexistent");
+        let expected_path = cwd
+            .join(Path::new("notes/todo.rs"))
+            .to_string_lossy()
+            .into_owned();
+        let expected_query = format!("quickFile={}", urlencoding::encode(&expected_path));
+
+        let target = parse_cli_launch_target(["--no-sandbox", "notes/todo.rs:42:7"], &cwd);
         assert_eq!(target.kind, "file");
-        assert_eq!(target.path.as_deref(), Some("/tmp/notes/todo.rs"));
+        assert_eq!(target.path.as_deref(), Some(expected_path.as_str()));
         assert_eq!(target.line, Some(42));
         assert_eq!(target.column, Some(7));
         let suffix = target.to_url_suffix();
-        assert!(suffix.contains("quickFile=%2Ftmp%2Fnotes%2Ftodo.rs"));
+        assert!(suffix.contains(&expected_query));
         assert!(suffix.contains("line=42"));
         assert!(suffix.contains("col=7"));
+
+        #[cfg(unix)]
+        {
+            let unix_cwd = Path::new("/tmp/hanzo-cli-target-nonexistent");
+            let unix_target = parse_cli_launch_target(["--no-sandbox", "notes/todo.rs:42:7"], unix_cwd);
+            assert_eq!(
+                unix_target.path.as_deref(),
+                Some("/tmp/hanzo-cli-target-nonexistent/notes/todo.rs")
+            );
+            assert!(unix_target
+                .to_url_suffix()
+                .contains("quickFile=%2Ftmp%2Fhanzo-cli-target-nonexistent%2Fnotes%2Ftodo.rs"));
+        }
     }
 
     #[test]

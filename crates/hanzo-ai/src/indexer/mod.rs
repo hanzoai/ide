@@ -480,3 +480,63 @@ fn resolve_import_path(from_file: &str, import_source: &str) -> String {
 
     parts.join("/")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    struct TempDirGuard(PathBuf);
+
+    impl Drop for TempDirGuard {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn indexes_builds_graphs_and_chunks_polyglot_workspace() {
+        let root = std::env::temp_dir().join(format!(
+            "hanzo-indexer-test-{}",
+            uuid::Uuid::new_v4()
+        ));
+        let _guard = TempDirGuard(root.clone());
+        std::fs::create_dir_all(root.join("src")).unwrap();
+
+        std::fs::write(
+            root.join("src/lib.rs"),
+            "pub struct Engine {\n    pub workers: usize,\n}\n\npub fn boot_engine(workers: usize) -> Engine {\n    Engine { workers }\n}\n",
+        )
+        .unwrap();
+        std::fs::write(
+            root.join("src/main.go"),
+            "package main\n\nfunc runWorker(id int) int {\n    return id + 1\n}\n\nfunc main() {\n    _ = runWorker(1)\n}\n",
+        )
+        .unwrap();
+        std::fs::write(
+            root.join("src/app.ts"),
+            "export function formatLabel(name: string): string {\n  return name.trim();\n}\n",
+        )
+        .unwrap();
+
+        let project = index_workspace(&root);
+        assert_eq!(project.file_count(), 3);
+        assert!(
+            project.symbol_count() >= 4,
+            "expected symbols across polyglot workspace, got {}",
+            project.symbol_count()
+        );
+
+        let chunks = chunker::chunk_project(&project, &root);
+        assert!(
+            !chunks.is_empty(),
+            "expected chunk_project to produce AST code chunks"
+        );
+
+        let mut code_index = index::CodeIndex::new(root.to_string_lossy().into_owned(), project);
+        let expected_chunks = chunks.len();
+        code_index.add_chunks(chunks);
+        assert_eq!(code_index.chunk_count(), expected_chunks);
+        assert!(code_index.call_graph.function_count() >= 3);
+    }
+}
